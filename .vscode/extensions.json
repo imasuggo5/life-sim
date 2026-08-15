@@ -1,3 +1,8 @@
 {
-  "recommendations": ["vscjava.vscode-java-pack", "josevseb.google-java-format-for-vs-code"]
+  "recommendations": [
+    "vscjava.vscode-java-pack",
+    "josevseb.google-java-format-for-vs-code",
+    "vmware.vscode-boot-dev-pack",
+    "shengchen.vscode-checkstyle"
+  ]
 }
