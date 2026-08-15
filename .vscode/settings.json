@@ -1,6 +1,10 @@
 {
   "[java]": {
     "editor.defaultFormatter": "josevseb.google-java-format-for-vs-code",
-    "editor.formatOnSave": true
-  }
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false
+  },
+  "java.compile.nullAnalysis.mode": "automatic"
 }
