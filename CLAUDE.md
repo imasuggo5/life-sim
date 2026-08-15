@@ -26,7 +26,13 @@ Google Java Style を Spotless(`com.diffplug.spotless` + `googleJavaFormat()`)�
 ./gradlew spotlessCheck   # 整形崩れがないか検査(CI等で使用)
 ```
 
-Checkstyleによる規約チェック(命名規則・Javadoc必須化など)は未導入。
+規約チェック(未使用import・命名規則・Javadoc必須化など)はCheckstyle + Googleの公式ruleset(`google_checks.xml`, `backend/config/checkstyle/checkstyle.xml`)で行っている。
+
+```bash
+./gradlew checkstyleMain checkstyleTest   # 検査(自動修正はできない)
+```
+
+レポートは`backend/build/reports/checkstyle/`に出力される。`./gradlew build`にも組み込まれているが、デフォルト設定では違反はほぼ`warning`扱いのためビルド自体は失敗しない(`error`severityの違反のみビルドを失敗させる)。**pre-commitフックには組み込んでいない**(自動修正できないツールをcommitのブロックに使うと、作業途中のコードをcommitしづらくなるため)。規約違反はビルド時やCI導入後のCIチェックで気づく運用とする。
 
 `build.gradle`(Groovy)自体は`googleJavaFormat()`の対象外(Java専用ツールのため)。`groovyGradle`ブロックで軽量ルール(タブ→スペース、末尾空白除去)のみ整形しており、`greclipse`等の本格的なGroovyフォーマッタは導入していない。
 

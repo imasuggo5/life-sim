@@ -31,3 +31,13 @@ Google Java Style を [Spotless](https://github.com/diffplug/spotless) 経由で
 ```
 
 `.java`と`build.gradle`(Groovy)の両方が対象。`git config core.hooksPath .githooks`を設定済みなら、コミット時に`.githooks/pre-commit`が自動で`spotlessApply`を実行し、整形済みの状態でコミットされる。
+
+### 規約チェック(Checkstyle)
+
+Google公式ruleset(`google_checks.xml`)を使い、未使用import・命名規則・Javadoc必須化などをチェックする。
+
+```bash
+./gradlew checkstyleMain checkstyleTest
+```
+
+レポートは`backend/build/reports/checkstyle/`に出力される。自動修正はできないため、pre-commitフックには含まれていない(`./gradlew build`実行時、またはCI導入後はCIで検知する)。
