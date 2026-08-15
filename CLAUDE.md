@@ -28,7 +28,11 @@ Google Java Style を Spotless(`com.diffplug.spotless` + `googleJavaFormat()`)�
 
 Checkstyleによる規約チェック(命名規則・Javadoc必須化など)は未導入。
 
-IDE連携(任意): IntelliJなら`google-java-format`プラグインを有効化すると標準の整形ショートカット(`Ctrl+Alt+L`)がGoogleスタイルになる。VSCodeなら拡張機能`google-java-format for VS Code`をJavaのデフォルトフォーマッタに設定すると`Shift+Alt+F`で同様に整形される。
+`build.gradle`(Groovy)自体は`googleJavaFormat()`の対象外(Java専用ツールのため)。`groovyGradle`ブロックで軽量ルール(タブ→スペース、末尾空白除去)のみ整形しており、`greclipse`等の本格的なGroovyフォーマッタは導入していない。
+
+**自動整形の仕組み:**
+- IDE(保存時): `.vscode/settings.json`でJavaファイルは`editor.formatOnSave`+`google-java-format for VS Code`拡張機能により、Spotlessと同じエンジンで整形される。`.vscode/extensions.json`で拡張機能を推奨表示。IntelliJの場合は`google-java-format`プラグインを有効化すると標準の整形ショートカット(`Ctrl+Alt+L`)がGoogleスタイルになる。
+- コミット時: `git config core.hooksPath .githooks`(clone後に1回実行)を設定していれば、`.githooks/pre-commit`が`./gradlew spotlessApply`を自動実行し、整形済みの状態で再ステージしてからコミットされる。`build.gradle`はIDE側では整形されないため、実質このフックが唯一の整形経路になる。
 
 ## 環境メモ(Windows/ARM64)
 
