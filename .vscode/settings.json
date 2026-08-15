@@ -8,5 +8,6 @@
   },
   "java.compile.nullAnalysis.mode": "automatic",
   "java.checkstyle.configuration": "${workspaceFolder}/backend/config/checkstyle/checkstyle.xml",
-  "java.checkstyle.version": "13.10.0"
+  "java.checkstyle.version": "13.10.0",
+  "java.dependency.packagePresentation": "hierarchical"
 }
