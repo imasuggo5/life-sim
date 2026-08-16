@@ -29,6 +29,8 @@ npm run build
 
 ## コードスタイル
 
+### Backend
+
 Google Java Style を Spotless(`com.diffplug.spotless` + `googleJavaFormat()`)で強制している。
 
 ```bash
@@ -49,6 +51,20 @@ Google Java Style を Spotless(`com.diffplug.spotless` + `googleJavaFormat()`)�
 **自動整形の仕組み:**
 - IDE(保存時): `.vscode/settings.json`でJavaファイルは`editor.formatOnSave`+`google-java-format for VS Code`拡張機能により、Spotlessと同じエンジンで整形される。`.vscode/extensions.json`で拡張機能を推奨表示。IntelliJの場合は`google-java-format`プラグインを有効化すると標準の整形ショートカット(`Ctrl+Alt+L`)がGoogleスタイルになる。
 - コミット時: `git config core.hooksPath .githooks`(clone後に1回実行)を設定していれば、`.githooks/pre-commit`が`./gradlew spotlessApply`を自動実行し、整形済みの状態で再ステージしてからコミットされる。`build.gradle`はIDE側では整形されないため、実質このフックが唯一の整形経路になる。
+
+### Frontend
+
+backendと同じ「Google公式スタイル」路線。整形は[Prettier](https://prettier.io/)(設定はGoogleの[`gts`](https://github.com/google/gts)のものをそのまま使用: `frontend/.prettierrc.json`)、規約チェックは`gts`のESLint設定(`require('gts')`で読み込み)にReact用ルール(`eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`)を足したもの(`frontend/eslint.config.js`)。Vite標準の`oxlint`は不使用(Google系ツールに統一するため置き換え)。
+
+```bash
+npm run format:fix   # 整形を適用(spotlessApply相当)
+npm run format       # 整形崩れがないか検査(spotlessCheck相当)
+npm run lint          # 規約チェック(checkstyleMain相当、自動修正なし)
+```
+
+自動整形の仕組みもbackendと対称: IDE保存時は`.vscode/settings.json`の`[typescript]`/`[typescriptreact]`スコープで`esbenp.prettier-vscode`が`editor.formatOnSave`により動作。コミット時は`.githooks/pre-commit`が`npm run format:fix`を自動実行する。`lint`(ESLint)は自動修正できないため、backendのCheckstyleと同様pre-commitフックには含めていない。
+
+`gts`自体は`typescript-eslint`/`eslint`/`prettier`等を依存関係として同梱しているため、`frontend/package.json`には`gts`のみを明示的に追加している(バージョンの二重管理を避けるため)。
 
 ## 環境メモ(Windows/ARM64)
 

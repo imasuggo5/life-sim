@@ -67,6 +67,18 @@ npm run build   # 本番ビルド (dist/)
 
 開発サーバーは`/api`宛のリクエストを`http://localhost:8080`(backend)へプロキシする設定になっている(`vite.config.ts`)。フロントの動作確認をするときは、backendを`./gradlew bootRun`で起動しておくこと。
 
+### コードフォーマット・規約チェック
+
+backendと同じ「Google公式スタイル」路線で揃えている。整形は[Prettier](https://prettier.io/)(設定はGoogleの[`gts`](https://github.com/google/gts)が使っているものと同一)、規約チェックは`gts`のESLint設定をベースに、React用のルール(`eslint-plugin-react-hooks`等)を追加したもの。
+
+```bash
+npm run format        # 整形崩れがないか検査 (spotlessCheck相当)
+npm run format:fix    # 整形を適用 (spotlessApply相当)
+npm run lint           # 規約チェック (checkstyleMain相当、自動修正なし)
+```
+
+`git config core.hooksPath .githooks`を設定済みなら、コミット時に`.githooks/pre-commit`が`format:fix`を自動実行する(backendの`spotlessApply`と同じ扱い)。`lint`は自動修正できないため、backendのCheckstyleと同様にpre-commitフックには含めていない。
+
 ## 本番ビルド(1つのアーティファクトにまとめる)
 
 ローカル開発ではfrontend/backendを別プロセスで動かすが、本番はfrontendのビルド成果物をbackendのjarに埋め込み、**Cloud Runサービス1つ**で動かす構成にする。
