@@ -112,3 +112,17 @@ sudo service docker start        # WSL再起動のたびに必要(systemd不使�
 ```
 
 Windows側から使う場合は `wsl -d Ubuntu -e docker ...` のように呼び出すか、WSLのターミナルを直接開いて操作する。
+
+## CI/CD
+
+`.github/workflows/ci.yml`が、`main`へのpushとPull Request時に以下を実行する(Linuxランナー、公開リポジトリのため無料):
+
+- **test-backend**: `./gradlew build`(Spotless/Checkstyle/testすべて含む)
+- **test-frontend**: `npm run format` / `npm run lint` / `npm run build`
+
+現時点ではテストのみで、GCPへのデプロイは行わない。今後、段階的に以下を追加していく予定:
+
+1. Artifact Registryへのイメージpush(要GCP事前準備: プロジェクト作成、API有効化、Workload Identity Federation設定)
+2. Cloud Runへのデプロイ(要追加のIAM権限)
+
+デプロイ関連の処理は`main`への直接pushの時だけ実行する設計にする予定(フォークからのPull Requestがデプロイ処理を起動しないようにするため)。

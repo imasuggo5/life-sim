@@ -64,6 +64,12 @@ npm run lint          # 規約チェック(oxlint)
 
 自動整形はbackendと同じ2段構え: IDE保存時は`.vscode/settings.json`の`[typescript]`/`[typescriptreact]`スコープで`esbenp.prettier-vscode`が`editor.formatOnSave`により動作(Lintのエディタ統合は`oxc.oxc-vscode`拡張機能)。コミット時は`.githooks/pre-commit`が`npm run format:fix`を自動実行する。`lint`(oxlint)はpre-commitフックには含めていない。
 
+## CI/CD
+
+`.github/workflows/ci.yml`で、`main`へのpush/PR時に`test-backend`(`./gradlew build`)・`test-frontend`(`npm run format`/`lint`/`build`)を実行している。両ジョブとも`ubuntu-latest`(コスト最小化のため、Linuxランナーは公開リポジトリでは無料・Windowsは2倍/macOSは10倍の消費倍率)。
+
+現状はテストのみで、GCPへのデプロイは行っていない。将来的にはArtifact Registryへのpush・Cloud Runへのデプロイを追加する予定だが、それらは`main`への直接pushの時だけ実行する設計にする(フォークからのPRがデプロイ処理を起動しないようにするため)。Docker HubではなくArtifact Registryを使う方針(非公開Docker Hubの場合、結局Artifact Registryのremote repository機能が必要になりメリットが薄いため)。
+
 ## 環境メモ(Windows/ARM64)
 
 シェルセッションによっては `JAVA_HOME` がPATHに反映されていないことがある。その場合は `gradlew` 実行前に以下が必要:
