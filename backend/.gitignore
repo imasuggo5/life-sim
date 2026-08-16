@@ -5,6 +5,10 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+### Embedded frontend build (production only, copied in by Dockerfile) ###
+src/main/resources/static/*
+!src/main/resources/static/.gitkeep
+
 ### STS ###
 .apt_generated
 .classpath

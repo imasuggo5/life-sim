@@ -66,3 +66,23 @@ npm run build   # 本番ビルド (dist/)
 ```
 
 開発サーバーは`/api`宛のリクエストを`http://localhost:8080`(backend)へプロキシする設定になっている(`vite.config.ts`)。フロントの動作確認をするときは、backendを`./gradlew bootRun`で起動しておくこと。
+
+## 本番ビルド(1つのアーティファクトにまとめる)
+
+ローカル開発ではfrontend/backendを別プロセスで動かすが、本番はfrontendのビルド成果物をbackendのjarに埋め込み、**Cloud Runサービス1つ**で動かす構成にする。
+
+```bash
+cd frontend && npm run build
+cp -r dist/* ../backend/src/main/resources/static/
+cd ../backend && ./gradlew bootRun
+# http://localhost:8080/ でフロント、/api/health でAPIが確認できる
+```
+
+または Docker で一括ビルド:
+
+```bash
+docker build -t life-sim .
+docker run -p 8080:8080 life-sim
+```
+
+`backend/src/main/java/com/lifesim/backend/config/SpaWebConfig.java`が、`classpath:/static/`配下の静的ファイル配信と、存在しないパスを`index.html`にフォールバックする処理(SPAのクライアントサイドルーティング用)を担っている。`backend/src/main/resources/static/`は`.gitkeep`のみをコミットしており、実際のビルド成果物はgit管理外(`.gitignore`参照)。
