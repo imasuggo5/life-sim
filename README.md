@@ -125,4 +125,4 @@ Windows側から使う場合は `wsl -d Ubuntu -e docker ...` のように呼び
 1. Artifact Registryへのイメージpush(要GCP事前準備: プロジェクト作成、API有効化、Workload Identity Federation設定)
 2. Cloud Runへのデプロイ(要追加のIAM権限)
 
-デプロイ関連の処理は`main`への直接pushの時だけ実行する設計にする予定(フォークからのPull Requestがデプロイ処理を起動しないようにするため)。
+デプロイ関連の処理は**PRが実際にマージされた時だけ**実行する設計にする予定(`on: pull_request: types: [closed]` + `if: github.event.pull_request.merged == true`)。直接`main`へpushしても、フォークからのPull Requestが閉じられても発火せず、「このリポジトリでPRがマージされた」場合にのみ絞り込める。

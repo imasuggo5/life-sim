@@ -68,7 +68,7 @@ npm run lint          # 規約チェック(oxlint)
 
 `.github/workflows/ci.yml`で、`main`へのpush/PR時に`test-backend`(`./gradlew build`)・`test-frontend`(`npm run format`/`lint`/`build`)を実行している。両ジョブとも`ubuntu-latest`(コスト最小化のため、Linuxランナーは公開リポジトリでは無料・Windowsは2倍/macOSは10倍の消費倍率)。
 
-現状はテストのみで、GCPへのデプロイは行っていない。将来的にはArtifact Registryへのpush・Cloud Runへのデプロイを追加する予定だが、それらは`main`への直接pushの時だけ実行する設計にする(フォークからのPRがデプロイ処理を起動しないようにするため)。Docker HubではなくArtifact Registryを使う方針(非公開Docker Hubの場合、結局Artifact Registryのremote repository機能が必要になりメリットが薄いため)。
+現状はテストのみで、GCPへのデプロイは行っていない。将来的にはArtifact Registryへのpush・Cloud Runへのデプロイを追加する予定だが、それらは**PRが実際にマージされた時だけ**実行する設計にする(`on: pull_request: types: [closed]` + `if: github.event.pull_request.merged == true`。直接pushやフォークからのPRクローズでは発火しない)。これに伴い、このリポジトリは今後`main`への直接pushではなく**PR経由での変更を基本とする運用に切り替える方針**(直接pushを続けると、その変更はCDのトリガーにならない)。Docker HubではなくArtifact Registryを使う方針(非公開Docker Hubの場合、結局Artifact Registryのremote repository機能が必要になりメリットが薄いため)。
 
 ## 環境メモ(Windows/ARM64)
 
