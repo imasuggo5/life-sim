@@ -1,6 +1,6 @@
 # life-sim
 
-React (frontend) + Java/Spring Boot (backend) のモノレポ。現状は `backend/` のみ実装済み。
+React (frontend) + Java/Spring Boot (backend) のモノレポ。
 
 ## セットアップ(clone後に1回)
 
@@ -53,3 +53,16 @@ Google公式ruleset(`google_checks.xml`)を使い、未使用import・命名規�
 ```
 
 レポートは`backend/build/reports/checkstyle/`に出力される。自動修正はできないため、pre-commitフックには含まれていない(`./gradlew build`実行時、またはCI導入後はCIで検知する)。
+
+## Frontend
+
+React + TypeScript / Vite。
+
+```bash
+cd frontend
+npm install
+npm run dev     # 開発サーバー起動 (http://localhost:5173)
+npm run build   # 本番ビルド (dist/)
+```
+
+開発サーバーは`/api`宛のリクエストを`http://localhost:8080`(backend)へプロキシする設定になっている(`vite.config.ts`)。フロントの動作確認をするときは、backendを`./gradlew bootRun`で起動しておくこと。

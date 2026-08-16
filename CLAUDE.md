@@ -1,20 +1,30 @@
 # life-sim
 
-React (frontend) + Java/Spring Boot (backend) のモノレポ。段階的に構築中で、現状は `backend/` のみ存在する(`frontend/` は未着手)。
+React (frontend) + Java/Spring Boot (backend) のモノレポ。段階的に構築中。
 
 ## 構成
 
 - `backend/` — Spring Boot 4.0.7, Java 25, Gradle(ラッパー同梱、Gradle自体のインストール不要)
   - `src/main/java/com/lifesim/backend/interfaces/` — APIコントローラー
   - ドメインロジックが増えてきたら `domain/`(エンティティ・値オブジェクト・リポジトリinterface)、`application/`(ユースケース)を `com.lifesim.backend` 配下に追加していく方針
+- `frontend/` — React + TypeScript, Vite(ラッパー無し、`.nvmrc`でNode 24.19.0を指定)
+  - Viteのデフォルトテンプレートのデモページ・アセットは削除済み(不要なコードを持ち込まない方針)
+  - 開発サーバーは`/api`宛のリクエストをbackend(`localhost:8080`)へプロキシする設定(`vite.config.ts`)。フロント単体の動作確認時もbackendを起動しておく必要がある
 
 ## ビルド・テスト・起動
 
 ```bash
+# backend
 cd backend
 ./gradlew build
 ./gradlew test
 ./gradlew bootRun
+
+# frontend
+cd frontend
+npm install
+npm run dev
+npm run build
 ```
 
 ## コードスタイル
