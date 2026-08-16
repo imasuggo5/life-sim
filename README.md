@@ -99,6 +99,16 @@ docker run -p 8080:8080 life-sim
 
 `backend/src/main/java/com/lifesim/backend/config/SpaWebConfig.java`が、`classpath:/static/`配下の静的ファイル配信と、存在しないパスを`index.html`にフォールバックする処理(SPAのクライアントサイドルーティング用)を担っている。`backend/src/main/resources/static/`は`.gitkeep`のみをコミットしており、実際のビルド成果物はgit管理外(`.gitignore`参照)。
 
-### Docker Desktopが不安定な場合
+### Docker(ARM64 Windows環境)
 
-ARM64版Windows環境では、Docker Desktop(Windows↔WSL2間の通信を挟む構成)が不安定になることがある(`docker build`のpullが極端に遅い、`docker info`が応答しない、GUIがエラーになる等)。症状が出たらDocker Desktopプロセスを再起動すると復旧することが多いが、恒久対策としてWSL2内に直接Docker Engineを入れる方法への移行を検討中。
+ARM64版Windowsでは、Docker Desktopが不安定になりやすい(`docker build`のpullが極端に遅い、`docker info`が応答しない、GUIがエラーになる等)ため、**Docker DesktopのGUIは使わず、WSL2(Ubuntu)内に直接Docker Engineをインストールして使う**。
+
+```bash
+# WSLのターミナル内で、初回のみ
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER   # 反映にはターミナルの再起動が必要
+sudo service docker start        # WSL再起動のたびに必要(systemd不使用のため自動起動しない)
+```
+
+Windows側から使う場合は `wsl -d Ubuntu -e docker ...` のように呼び出すか、WSLのターミナルを直接開いて操作する。

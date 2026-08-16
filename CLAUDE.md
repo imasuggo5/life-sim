@@ -73,4 +73,17 @@ $env:JAVA_HOME = "C:\Program Files\Microsoft\jdk-25.0.4.7-hotspot"
 $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 ```
 
-**Docker Desktopが不安定**: このマシン(ARM64 Windows)では、`docker build`のイメージpullが極端に遅くなる・`docker info`が応答しなくなる・Docker DesktopのGUI(Imagesパネル等)がエラーになる、といった不具合が頻発している。原因は、Docker DesktopがWindowsホストとWSL2内の実際のデーモンとの間を名前付きパイプで橋渡ししており、この境界を跨ぐ通信が不安定になりやすいため(ARM64版Windowsという組み合わせ自体がまだ枯れていないことも一因と思われる)。症状が出た場合はDocker Desktopプロセスの再起動(`Get-Process`で`docker`/`com.docker`関連を`Stop-Process`→Docker Desktop.exeを再起動)で復旧することが多い。恒久対策として、Docker DesktopのGUIを介さず**WSL2内に直接Docker Engineをインストールする**方向に移行中(Windows↔WSL2間のパイプ越し通信を無くすことで安定化を狙う)。
+**Docker DesktopではなくWSL2内のDocker Engineを使う**: このマシン(ARM64 Windows)ではDocker Desktopが不安定だった(`docker build`のイメージpullが極端に遅くなる・`docker info`が応答しなくなる・GUIがエラーになる等)。原因は、Docker DesktopがWindowsホストとWSL2内の実際のデーモンとの間を名前付きパイプで橋渡ししており、この境界を跨ぐ通信が不安定になりやすいため(ARM64版Windowsという組み合わせ自体がまだ枯れていないことも一因と思われる)。そのため、**Docker DesktopのGUIを使わず、WSL2(Ubuntu)内に直接Docker Engineをインストールする**方式に移行済み。
+
+セットアップ手順(初回のみ、WSLのターミナル内で実行):
+
+```bash
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+sudo service docker start
+```
+
+`usermod`でグループに追加した変更は、WSLのターミナルを一度閉じて開き直す(または`newgrp docker`)まで反映されない。WSLを再起動するたびに`sudo service docker start`でデーモンを起動し直す必要がある(systemdではないため自動起動しない)。
+
+`docker`コマンド自体はWindows側のGitHub Bash/PowerShellからではなく、**`wsl -d Ubuntu -e <command>`経由、またはWSLのターミナルを直接開いて**実行する。
