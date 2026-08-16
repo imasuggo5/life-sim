@@ -3,6 +3,8 @@
     "vscjava.vscode-java-pack",
     "josevseb.google-java-format-for-vs-code",
     "vmware.vscode-boot-dev-pack",
-    "shengchen.vscode-checkstyle"
+    "shengchen.vscode-checkstyle",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint"
   ]
 }

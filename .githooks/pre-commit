@@ -1,6 +1,6 @@
 #!/bin/sh
-# Auto-formats backend sources (Google Java Style via Spotless) before each
-# commit and re-stages any files it touches.
+# Auto-formats backend (Google Java Style via Spotless) and frontend
+# (Prettier) sources before each commit and re-stages any files touched.
 set -e
 
 repo_root="$(git rev-parse --show-toplevel)"
@@ -8,4 +8,9 @@ repo_root="$(git rev-parse --show-toplevel)"
 if [ -d "$repo_root/backend" ]; then
   (cd "$repo_root/backend" && ./gradlew spotlessApply -q)
   git -C "$repo_root" add -u backend
+fi
+
+if [ -d "$repo_root/frontend" ]; then
+  (cd "$repo_root/frontend" && npm run format:fix --silent)
+  git -C "$repo_root" add -u frontend
 fi
