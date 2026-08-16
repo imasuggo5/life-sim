@@ -160,15 +160,17 @@ gcloud artifacts repositories create life-sim \
   --location=asia-northeast1
 
 # 直近2バージョンのみ保持し、無料枠(0.5GB/月)超過を防ぐ
+# (トップレベルは配列。packageNamePrefixesを省略するとリポジトリ内の全パッケージが対象になる)
 cat > /tmp/cleanup-policy.json << 'EOF'
-{
-  "keep-recent": {
-    "action": "KEEP",
+[
+  {
+    "name": "keep-recent-versions",
+    "action": {"type": "Keep"},
     "mostRecentVersions": {
       "keepCount": 2
     }
   }
-}
+]
 EOF
 
 gcloud artifacts repositories set-cleanup-policies life-sim \
