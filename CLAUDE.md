@@ -72,3 +72,5 @@ npm run lint          # 規約チェック(oxlint)
 $env:JAVA_HOME = "C:\Program Files\Microsoft\jdk-25.0.4.7-hotspot"
 $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 ```
+
+**Docker Desktopが不安定**: このマシン(ARM64 Windows)では、`docker build`のイメージpullが極端に遅くなる・`docker info`が応答しなくなる・Docker DesktopのGUI(Imagesパネル等)がエラーになる、といった不具合が頻発している。原因は、Docker DesktopがWindowsホストとWSL2内の実際のデーモンとの間を名前付きパイプで橋渡ししており、この境界を跨ぐ通信が不安定になりやすいため(ARM64版Windowsという組み合わせ自体がまだ枯れていないことも一因と思われる)。症状が出た場合はDocker Desktopプロセスの再起動(`Get-Process`で`docker`/`com.docker`関連を`Stop-Process`→Docker Desktop.exeを再起動)で復旧することが多い。恒久対策として、Docker DesktopのGUIを介さず**WSL2内に直接Docker Engineをインストールする**方向に移行中(Windows↔WSL2間のパイプ越し通信を無くすことで安定化を狙う)。
