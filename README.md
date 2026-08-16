@@ -126,3 +126,111 @@ Windows側から使う場合は `wsl -d Ubuntu -e docker ...` のように呼び
 2. Cloud Runへのデプロイ(要追加のIAM権限)
 
 デプロイ関連の処理は**PRが実際にマージされた時だけ**実行する設計にする予定(`on: pull_request: types: [closed]` + `if: github.event.pull_request.merged == true`)。直接`main`へpushしても、フォークからのPull Requestが閉じられても発火せず、「このリポジトリでPRがマージされた」場合にのみ絞り込める。
+
+### GCP事前準備(Artifact Registryへのpushに必要、初回のみ)
+
+以下は`gcloud` CLIが使える環境(Cloud Shell、またはローカルに`gcloud`をインストール済みの環境)で実行する。Terraformは使わず、コマンドを直接実行する方針(このプロジェクトの規模ではTerraformのState管理コストの方が大きいため)。
+
+**1. プロジェクト作成 + 課金アカウント紐付け**
+
+```bash
+# プロジェクトIDはグローバルに一意である必要がある。例: life-sim-<好きな文字列>
+gcloud projects create life-sim-prod --name="life-sim"
+gcloud config set project life-sim-prod
+
+# 課金アカウントIDを確認してから紐付け(Cloud Run/Artifact Registryは無料枠内想定だが、GCPの仕様上プロジェクトへの課金アカウント紐付け自体は必須)
+gcloud billing accounts list
+gcloud billing projects link life-sim-prod --billing-account=XXXXXX-XXXXXX-XXXXXX
+```
+
+**2. 必要なAPIを有効化**
+
+```bash
+gcloud services enable \
+  run.googleapis.com \
+  artifactregistry.googleapis.com \
+  iamcredentials.googleapis.com
+```
+
+**3. Artifact Registryリポジトリ作成 + クリーンアップポリシー設定**
+
+```bash
+gcloud artifacts repositories create life-sim \
+  --repository-format=docker \
+  --location=asia-northeast1
+
+# 直近2バージョンのみ保持し、無料枠(0.5GB/月)超過を防ぐ
+cat > /tmp/cleanup-policy.json << 'EOF'
+{
+  "keep-recent": {
+    "action": "KEEP",
+    "mostRecentVersions": {
+      "keepCount": 2
+    }
+  }
+}
+EOF
+
+gcloud artifacts repositories set-cleanup-policies life-sim \
+  --location=asia-northeast1 \
+  --policy=/tmp/cleanup-policy.json
+```
+
+**4. Workload Identity Federationのセットアップ(GitHub Actions用のkeyless認証)**
+
+```bash
+PROJECT_ID=$(gcloud config get-value project)
+PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
+GITHUB_REPO="imasuggo5/life-sim"
+
+# Workload Identity Pool作成
+gcloud iam workload-identity-pools create "github-pool" \
+  --location="global" \
+  --display-name="GitHub Actions Pool"
+
+# OIDC Provider作成(このリポジトリ以外からの認証は拒否するよう制限)
+gcloud iam workload-identity-pools providers create-oidc "github-provider" \
+  --location="global" \
+  --workload-identity-pool="github-pool" \
+  --display-name="GitHub Actions Provider" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
+  --attribute-condition="assertion.repository=='${GITHUB_REPO}'" \
+  --issuer-uri="https://token.actions.githubusercontent.com"
+
+# デプロイ用サービスアカウント作成
+gcloud iam service-accounts create life-sim-deployer \
+  --display-name="life-sim GitHub Actions deployer"
+
+# Artifact Registryへのpush権限を付与(Cloud Runへのデプロイ権限は、実際にデプロイジョブを作る段階で追加する)
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:life-sim-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role="roles/artifactregistry.writer"
+
+# このGitHubリポジトリからのimpersonationを許可
+gcloud iam service-accounts add-iam-policy-binding \
+  "life-sim-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role="roles/iam.workloadIdentityUser" \
+  --member="principalSet://iam.googleapis.com/projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github-pool/attribute.repository/${GITHUB_REPO}"
+```
+
+**5. GitHubリポジトリにSecrets/Variablesを登録**
+
+まず登録すべき値を確認:
+
+```bash
+echo "GCP_PROJECT_ID: ${PROJECT_ID}"
+echo "GAR_LOCATION: asia-northeast1"
+echo "GCP_WORKLOAD_IDENTITY_PROVIDER: projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+echo "GCP_SERVICE_ACCOUNT: life-sim-deployer@${PROJECT_ID}.iam.gserviceaccount.com"
+```
+
+`gh` CLIが使える場合:
+
+```bash
+gh variable set GCP_PROJECT_ID --body "$PROJECT_ID"
+gh variable set GAR_LOCATION --body "asia-northeast1"
+gh secret set GCP_WORKLOAD_IDENTITY_PROVIDER --body "projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+gh secret set GCP_SERVICE_ACCOUNT --body "life-sim-deployer@${PROJECT_ID}.iam.gserviceaccount.com"
+```
+
+`gh` CLIが無い場合は、GitHubリポジトリの Settings > Secrets and variables > Actions から手動で登録する(Variablesタブに`GCP_PROJECT_ID`・`GAR_LOCATION`、Secretsタブに`GCP_WORKLOAD_IDENTITY_PROVIDER`・`GCP_SERVICE_ACCOUNT`)。
