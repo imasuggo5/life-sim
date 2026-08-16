@@ -5,6 +5,6 @@
     "vmware.vscode-boot-dev-pack",
     "shengchen.vscode-checkstyle",
     "esbenp.prettier-vscode",
-    "dbaeumer.vscode-eslint"
+    "oxc.oxc-vscode"
   ]
 }

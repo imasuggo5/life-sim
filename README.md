@@ -69,15 +69,15 @@ npm run build   # 本番ビルド (dist/)
 
 ### コードフォーマット・規約チェック
 
-backendと同じ「Google公式スタイル」路線で揃えている。整形は[Prettier](https://prettier.io/)(設定はGoogleの[`gts`](https://github.com/google/gts)が使っているものと同一)、規約チェックは`gts`のESLint設定をベースに、React用のルール(`eslint-plugin-react-hooks`等)を追加したもの。
+Vite公式テンプレートの標準構成([Prettier](https://prettier.io/)はデフォルト設定、Lintは[oxlint](https://oxc.rs/)、どちらも特定のスタイルガイドには寄せていない)をそのまま使っている。
 
 ```bash
-npm run format        # 整形崩れがないか検査 (spotlessCheck相当)
-npm run format:fix    # 整形を適用 (spotlessApply相当)
-npm run lint           # 規約チェック (checkstyleMain相当、自動修正なし)
+npm run format        # 整形崩れがないか検査
+npm run format:fix    # 整形を適用
+npm run lint           # 規約チェック(oxlint)
 ```
 
-`git config core.hooksPath .githooks`を設定済みなら、コミット時に`.githooks/pre-commit`が`format:fix`を自動実行する(backendの`spotlessApply`と同じ扱い)。`lint`は自動修正できないため、backendのCheckstyleと同様にpre-commitフックには含めていない。
+`git config core.hooksPath .githooks`を設定済みなら、コミット時に`.githooks/pre-commit`が`format:fix`(Prettier)を自動実行する。`lint`(oxlint)はpre-commitフックには含めていない。
 
 ## 本番ビルド(1つのアーティファクトにまとめる)
 

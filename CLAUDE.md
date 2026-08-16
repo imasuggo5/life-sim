@@ -54,17 +54,15 @@ Google Java Style を Spotless(`com.diffplug.spotless` + `googleJavaFormat()`)�
 
 ### Frontend
 
-backendと同じ「Google公式スタイル」路線。整形は[Prettier](https://prettier.io/)(設定はGoogleの[`gts`](https://github.com/google/gts)のものをそのまま使用: `frontend/.prettierrc.json`)、規約チェックは`gts`のESLint設定(`require('gts')`で読み込み)にReact用ルール(`eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`)を足したもの(`frontend/eslint.config.js`)。Vite標準の`oxlint`は不使用(Google系ツールに統一するため置き換え)。
+backendとは異なり、こちらはGoogle系ではなく**Vite公式テンプレートの標準構成**をそのまま採用する方針(frontend界隈での最頻出パターンを優先)。整形は[Prettier](https://prettier.io/)(デフォルト設定、カスタマイズ無し)、規約チェックは[oxlint](https://oxc.rs/)(`frontend/.oxlintrc.json`はVite公式テンプレート生成のまま)。一度`gts`(Google TypeScript Style)ベースの構成を試したが、「frontendではGoogle色を出さず、Viteの最頻出構成に揃える」という判断で撤回した経緯がある。
 
 ```bash
-npm run format:fix   # 整形を適用(spotlessApply相当)
-npm run format       # 整形崩れがないか検査(spotlessCheck相当)
-npm run lint          # 規約チェック(checkstyleMain相当、自動修正なし)
+npm run format:fix   # 整形を適用
+npm run format       # 整形崩れがないか検査
+npm run lint          # 規約チェック(oxlint)
 ```
 
-自動整形の仕組みもbackendと対称: IDE保存時は`.vscode/settings.json`の`[typescript]`/`[typescriptreact]`スコープで`esbenp.prettier-vscode`が`editor.formatOnSave`により動作。コミット時は`.githooks/pre-commit`が`npm run format:fix`を自動実行する。`lint`(ESLint)は自動修正できないため、backendのCheckstyleと同様pre-commitフックには含めていない。
-
-`gts`自体は`typescript-eslint`/`eslint`/`prettier`等を依存関係として同梱しているため、`frontend/package.json`には`gts`のみを明示的に追加している(バージョンの二重管理を避けるため)。
+自動整形はbackendと同じ2段構え: IDE保存時は`.vscode/settings.json`の`[typescript]`/`[typescriptreact]`スコープで`esbenp.prettier-vscode`が`editor.formatOnSave`により動作(Lintのエディタ統合は`oxc.oxc-vscode`拡張機能)。コミット時は`.githooks/pre-commit`が`npm run format:fix`を自動実行する。`lint`(oxlint)はpre-commitフックには含めていない。
 
 ## 環境メモ(Windows/ARM64)
 
