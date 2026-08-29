@@ -119,13 +119,9 @@ Windows側から使う場合は `wsl -d Ubuntu -e docker ...` のように呼び
 
 - **test-backend**: `./gradlew build`(Spotless/Checkstyle/testすべて含む)
 - **test-frontend**: `npm run format` / `npm run lint` / `npm run build`
+- **push-image**: **PRが実際にマージされた時だけ**実行(`pull_request: types: [closed]` + `if: github.event.pull_request.merged == true`。直接`main`へのpushやマージせず閉じたPRでは発火しない)。Workload Identity Federationで認証し、ルートの`Dockerfile`をビルドしてArtifact Registryに`latest`と`${{ github.sha }}`タグでpushする
 
-現時点ではテストのみで、GCPへのデプロイは行わない。今後、段階的に以下を追加していく予定:
-
-1. Artifact Registryへのイメージpush(要GCP事前準備: プロジェクト作成、API有効化、Workload Identity Federation設定)
-2. Cloud Runへのデプロイ(要追加のIAM権限)
-
-デプロイ関連の処理は**PRが実際にマージされた時だけ**実行する設計にする予定(`on: pull_request: types: [closed]` + `if: github.event.pull_request.merged == true`)。直接`main`へpushしても、フォークからのPull Requestが閉じられても発火せず、「このリポジトリでPRがマージされた」場合にのみ絞り込める。
+Cloud Runへの実デプロイはまだ行っていない。次の段階で`push-image`の後に`deploy`ジョブ(`google-github-actions/deploy-cloudrun`、`--min-instances=0`・`--max-instances=2`等のコスト最小化設定込み、要追加のIAM権限`roles/run.admin`)を追加する予定。
 
 ### GCP事前準備(Artifact Registryへのpushに必要、初回のみ)
 
