@@ -84,6 +84,6 @@ jobs:
           service: life-sim
           region: ${{ vars.GAR_LOCATION }}
           image: ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/life-sim/life-sim:${{ github.sha }}
-          flags: --min-instances=0 --max-instances=2
+          flags: --min-instances=0 --max-instances=2 --service-account=life-sim-runtime@${{ vars.GCP_PROJECT_ID }}.iam.gserviceaccount.com
 
       - run: echo "Deployed to ${{ steps.deploy.outputs.url }}"

@@ -234,7 +234,7 @@ gh secret set GCP_SERVICE_ACCOUNT --body "life-sim-deployer@${PROJECT_ID}.iam.gs
 
 ### Cloud Runへのデプロイに必要な追加権限
 
-Artifact Registryへのpushに加えて、Cloud Runへのデプロイ権限を`life-sim-deployer`に付与する。
+Artifact Registryへのpushに加えて、Cloud Runへのデプロイ権限を`life-sim-deployer`に付与する。あわせて、**Cloud Runサービス自体が実行時に使う専用のサービスアカウント**(`life-sim-runtime`)を新規作成する(このアプリはGCPの他のAPIを呼ばないため、追加の権限は一切付与しない最小権限のアカウントにする。GCPのデフォルトのCompute Engine用サービスアカウントに依存すると、Compute Engine APIを有効化していないプロジェクトでは存在せずエラーになるため、依存しない設計にしている)。
 
 ```bash
 PROJECT_ID=$(gcloud config get-value project)
@@ -243,10 +243,13 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
   --member="serviceAccount:life-sim-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
   --role="roles/run.admin"
 
-# デプロイされたCloud Runサービス自体が使う実行用サービスアカウントを、
-# life-sim-deployerが指定できるようにする(actAs権限)
+# Cloud Run実行専用のサービスアカウントを作成(追加の権限は付与しない)
+gcloud iam service-accounts create life-sim-runtime \
+  --display-name="life-sim Cloud Run runtime"
+
+# life-sim-deployerが、デプロイ時にこのランタイム用アカウントを指定できるようにする(actAs権限)
 gcloud iam service-accounts add-iam-policy-binding \
-  "$(gcloud iam service-accounts list --filter='displayName:Compute Engine default service account' --format='value(email)')" \
+  "life-sim-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
   --member="serviceAccount:life-sim-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
   --role="roles/iam.serviceAccountUser"
 ```
