@@ -254,6 +254,40 @@ gcloud iam service-accounts add-iam-policy-binding \
   --role="roles/iam.serviceAccountUser"
 ```
 
+### IAM構成の全体像
+
+**リソース一覧:**
+
+| リソース名 | 種類 | 役割 |
+|---|---|---|
+| `github-pool` | Workload Identity Pool | GitHubからの外部認証を受け付ける入れ物 |
+| `github-provider` | Provider(`github-pool`内) | GitHub Actionsを信頼する設定。`imasuggo5/life-sim`のみ許可(`--attribute-condition`) |
+| `life-sim-deployer` | サービスアカウント | **CI/CDが名乗る**、デプロイ作業用のアカウント |
+| `life-sim-runtime` | サービスアカウント | **デプロイ後のCloud Runアプリ自身**が実行時に使うアカウント |
+
+**権限(IAMバインディング)の整理:**
+
+1. `life-sim-deployer`にプロジェクト全体への権限を付与: `roles/artifactregistry.writer`(pushできる)・`roles/run.admin`(デプロイできる)
+2. `life-sim-deployer`自身に対し、`github-pool`経由で`imasuggo5/life-sim`から来た身元だけが`roles/iam.workloadIdentityUser`でなりすませるよう設定
+3. `life-sim-runtime`自身に対し、`life-sim-deployer`が`roles/iam.serviceAccountUser`で「デプロイ時にこのアカウントを使わせる」と指定できるよう設定
+4. `life-sim-runtime`自体には**権限を一切付与しない**(アプリは他のGCP APIを呼ばないため、意図的に最小権限)
+
+**全体の流れ(1回のデプロイで起きること):**
+
+```
+GitHub Actions(imasuggo5/life-sim)
+  → ①OIDCトークンで認証(github-poolのProviderが検証)
+  → ②workloadIdentityUser権限により life-sim-deployer になりすます
+life-sim-deployer(CI/CD用アカウント)
+  → ③artifactregistry.writer権限でイメージをpush
+  → ④run.admin権限でCloud Runにデプロイを実行
+  → ⑤serviceAccountUser権限で「実行は life-sim-runtime で」と指定
+Cloud Run上で life-sim-runtime として稼働
+  (このアカウントには何の権限も無い = アプリに脆弱性があっても他のGCPリソースには影響しない)
+```
+
+「デプロイする権限を持つアカウント(`life-sim-deployer`)」と「実際にアプリが動く時のアカウント(`life-sim-runtime`)」を分離することで、被害範囲を最小化する設計にしている。
+
 ### カスタムドメインの紐付け(`imasuggo5.com`)
 
 Cloud Runは固定IPという概念を持たないが、カスタムドメインのマッピング機能で独自ドメインに紐づけられる(追加コストなし)。
