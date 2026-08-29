@@ -70,7 +70,7 @@ npm run lint          # 規約チェック(oxlint)
 
 `push-image`ジョブは**PRが実際にマージされた時だけ**実行される(`pull_request: types: [closed]` + `if: github.event.pull_request.merged == true`。直接pushやフォークからのPRクローズでは発火しない)。これに伴い、このリポジトリは`main`への直接pushではなく**PR経由での変更を基本とする運用**にしている(直接pushを続けると、その変更は`push-image`のトリガーにならない)。Workload Identity Federationで認証し、ルートの`Dockerfile`をビルドしてArtifact Registryに`latest`と`${{ github.sha }}`タグでpushする。Docker HubではなくArtifact Registryを使う方針(非公開Docker Hubの場合、結局Artifact Registryのremote repository機能が必要になりメリットが薄いため)。
 
-`deploy`ジョブ(`push-image`と同じPRマージ限定の条件)が、`google-github-actions/deploy-cloudrun`でCloud Runにデプロイする。コスト最小化のため`--min-instances=0`(スケールtoゼロ)・`--max-instances=2`を指定。
+`deploy`ジョブ(`push-image`と同じPRマージ限定の条件)が、`google-github-actions/deploy-cloudrun`でCloud Runにデプロイする。コスト最小化のため`--min-instances=0`(スケールtoゼロ)・`--max-instances=2`を指定。Cloud Runはデフォルトで未認証アクセスを拒否する(初回デプロイ時に`--allow-unauthenticated`を付け忘れ、`403 Forbidden`になった経緯がある)ため、`--allow-unauthenticated`を必ず指定する。
 
 カスタムドメイン(`imasuggo5.com`、お名前.comで取得)をCloud Runのドメインマッピング機能で紐づけている。固定IPは使っていない(Cloud Runはそもそも固定IPという概念を持たず、ドメインマッピングだけなら追加コストなしで独自ドメインが使える。固定IPが本当に必要な場合はGlobal Load Balancerが必要になり、月$18程度の固定費が発生するため今回は不採用)。
 

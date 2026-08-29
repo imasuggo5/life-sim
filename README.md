@@ -120,7 +120,7 @@ Windows側から使う場合は `wsl -d Ubuntu -e docker ...` のように呼び
 - **test-backend**: `./gradlew build`(Spotless/Checkstyle/testすべて含む)
 - **test-frontend**: `npm run format` / `npm run lint` / `npm run build`
 - **push-image**: **PRが実際にマージされた時だけ**実行(`pull_request: types: [closed]` + `if: github.event.pull_request.merged == true`。直接`main`へのpushやマージせず閉じたPRでは発火しない)。Workload Identity Federationで認証し、ルートの`Dockerfile`をビルドしてArtifact Registryに`latest`と`${{ github.sha }}`タグでpushする
-- **deploy**: `push-image`と同じ条件(PRマージ時のみ)で実行。`google-github-actions/deploy-cloudrun`で、Artifact Registryにpushしたイメージ(`${{ github.sha }}`タグ)をCloud Runにデプロイする。コスト最小化のため`--min-instances=0`(スケールtoゼロ)・`--max-instances=2`(意図しないトラフィック急増への上限)を指定
+- **deploy**: `push-image`と同じ条件(PRマージ時のみ)で実行。`google-github-actions/deploy-cloudrun`で、Artifact Registryにpushしたイメージ(`${{ github.sha }}`タグ)をCloud Runにデプロイする。コスト最小化のため`--min-instances=0`(スケールtoゼロ)・`--max-instances=2`(意図しないトラフィック急増への上限)を指定。**`--allow-unauthenticated`も必須**(Cloud Runはデフォルトで未認証アクセスを拒否するため、これが無いと誰もアクセスできず`403 Forbidden`になる)
 
 ### GCP事前準備(Artifact Registryへのpushに必要、初回のみ)
 
