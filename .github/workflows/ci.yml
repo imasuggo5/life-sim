@@ -61,3 +61,29 @@ jobs:
           docker build -t "$IMAGE:latest" -t "$IMAGE:${{ github.sha }}" .
           docker push "$IMAGE:latest"
           docker push "$IMAGE:${{ github.sha }}"
+
+  deploy:
+    needs: push-image
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # required for Workload Identity Federation
+    steps:
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      # Cloud Run service and Artifact Registry share the same region (asia-northeast1)
+      # so image pulls stay free (same-region egress); GAR_LOCATION doubles as the deploy region.
+      - id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: life-sim
+          region: ${{ vars.GAR_LOCATION }}
+          image: ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/life-sim/life-sim:${{ github.sha }}
+          flags: --min-instances=0 --max-instances=2
+
+      - run: echo "Deployed to ${{ steps.deploy.outputs.url }}"

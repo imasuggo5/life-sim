@@ -120,8 +120,7 @@ Windows側から使う場合は `wsl -d Ubuntu -e docker ...` のように呼び
 - **test-backend**: `./gradlew build`(Spotless/Checkstyle/testすべて含む)
 - **test-frontend**: `npm run format` / `npm run lint` / `npm run build`
 - **push-image**: **PRが実際にマージされた時だけ**実行(`pull_request: types: [closed]` + `if: github.event.pull_request.merged == true`。直接`main`へのpushやマージせず閉じたPRでは発火しない)。Workload Identity Federationで認証し、ルートの`Dockerfile`をビルドしてArtifact Registryに`latest`と`${{ github.sha }}`タグでpushする
-
-Cloud Runへの実デプロイはまだ行っていない。次の段階で`push-image`の後に`deploy`ジョブ(`google-github-actions/deploy-cloudrun`、`--min-instances=0`・`--max-instances=2`等のコスト最小化設定込み、要追加のIAM権限`roles/run.admin`)を追加する予定。
+- **deploy**: `push-image`と同じ条件(PRマージ時のみ)で実行。`google-github-actions/deploy-cloudrun`で、Artifact Registryにpushしたイメージ(`${{ github.sha }}`タグ)をCloud Runにデプロイする。コスト最小化のため`--min-instances=0`(スケールtoゼロ)・`--max-instances=2`(意図しないトラフィック急増への上限)を指定
 
 ### GCP事前準備(Artifact Registryへのpushに必要、初回のみ)
 
@@ -230,5 +229,53 @@ gh variable set GAR_LOCATION --body "asia-northeast1"
 gh secret set GCP_WORKLOAD_IDENTITY_PROVIDER --body "projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
 gh secret set GCP_SERVICE_ACCOUNT --body "life-sim-deployer@${PROJECT_ID}.iam.gserviceaccount.com"
 ```
+
+`gh` CLIが無い場合は、GitHubリポジトリの Settings > Secrets and variables > Actions から手動で登録する(Variablesタブに`GCP_PROJECT_ID`・`GAR_LOCATION`、Secretsタブに`GCP_WORKLOAD_IDENTITY_PROVIDER`・`GCP_SERVICE_ACCOUNT`)。
+
+### Cloud Runへのデプロイに必要な追加権限
+
+Artifact Registryへのpushに加えて、Cloud Runへのデプロイ権限を`life-sim-deployer`に付与する。
+
+```bash
+PROJECT_ID=$(gcloud config get-value project)
+
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:life-sim-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role="roles/run.admin"
+
+# デプロイされたCloud Runサービス自体が使う実行用サービスアカウントを、
+# life-sim-deployerが指定できるようにする(actAs権限)
+gcloud iam service-accounts add-iam-policy-binding \
+  "$(gcloud iam service-accounts list --filter='displayName:Compute Engine default service account' --format='value(email)')" \
+  --member="serviceAccount:life-sim-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountUser"
+```
+
+### カスタムドメインの紐付け(`imasuggo5.com`)
+
+Cloud Runは固定IPという概念を持たないが、カスタムドメインのマッピング機能で独自ドメインに紐づけられる(追加コストなし)。
+
+**1. ドメイン所有権の確認**
+
+[Google Search Console](https://search.google.com/search-console)に、デプロイに使うのと同じGoogleアカウントで`imasuggo5.com`を登録し、所有権を確認する(お名前.comのDNS管理画面でTXTレコードを追加する形が一般的)。
+
+**2. ドメインマッピングを作成**
+
+```bash
+gcloud beta run domain-mappings create \
+  --service=life-sim \
+  --domain=imasuggo5.com \
+  --region=asia-northeast1
+```
+
+実行すると、設定すべきDNSレコード(ルートドメインなのでA/AAAAレコード)が出力される。
+
+**3. お名前.comのDNS設定にレコードを追加**
+
+お名前.comの管理画面(DNS設定/ネームサーバー設定)で、上記コマンドが出力したA/AAAAレコードをそのまま登録する。既存のレコード(特にAレコード)と競合しないよう注意する。
+
+**4. 反映を待つ**
+
+DNS反映(数分〜24時間程度)後、GoogleがマネージドSSL証明書を自動発行する。`gcloud beta run domain-mappings describe --domain=imasuggo5.com --region=asia-northeast1`で証明書の発行状況を確認できる。反映後は`https://imasuggo5.com`でアクセスできるようになる。
 
 `gh` CLIが無い場合は、GitHubリポジトリの Settings > Secrets and variables > Actions から手動で登録する(Variablesタブに`GCP_PROJECT_ID`・`GAR_LOCATION`、Secretsタブに`GCP_WORKLOAD_IDENTITY_PROVIDER`・`GCP_SERVICE_ACCOUNT`)。
