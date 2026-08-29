@@ -79,6 +79,15 @@ npm run lint           # 規約チェック(oxlint)
 
 `git config core.hooksPath .githooks`を設定済みなら、コミット時に`.githooks/pre-commit`が`format:fix`(Prettier)を自動実行する。`lint`(oxlint)はpre-commitフックには含めていない。
 
+### 検索エンジン対応
+
+検索エンジンに見つかりやすくする方針(独自ドメインは持たず、Cloud Runの自動生成URL`*.a.run.app`のまま運用)。
+
+- `frontend/index.html`: `description`/OGPメタタグを設定
+- `frontend/public/robots.txt`: 全クローラーを明示的に許可(`Allow: /`)
+- **Google Search Console**: `https://life-sim-7kbsgabama-an.a.run.app`を「URLプレフィックス」プロパティとして登録済み。所有権確認は`index.html`内の`google-site-verification`メタタグ方式(HTMLファイルアップロード方式ではなくこちらを採用、コード管理下に置けるため)。確認後、Search Consoleの「URL検査」ツールから「インデックス登録をリクエスト」すると、自然なクロールを待つより早くインデックスされる
+- GitHubリポジトリの「About」欄にも、実際のCloud RunのURLをWebsiteとして設定すると、GitHubからの被リンクとして発見されやすくなる
+
 ## 本番ビルド(1つのアーティファクトにまとめる)
 
 ローカル開発ではfrontend/backendを別プロセスで動かすが、本番はfrontendのビルド成果物をbackendのjarに埋め込み、**Cloud Runサービス1つ**で動かす構成にする。
