@@ -72,7 +72,9 @@ npm run lint          # 規約チェック(oxlint)
 
 `deploy`ジョブ(`push-image`と同じPRマージ限定の条件)が、`google-github-actions/deploy-cloudrun`でCloud Runにデプロイする。コスト最小化のため`--min-instances=0`(スケールtoゼロ)・`--max-instances=2`を指定。Cloud Runはデフォルトで未認証アクセスを拒否する(初回デプロイ時に`--allow-unauthenticated`を付け忘れ、`403 Forbidden`になった経緯がある)ため、`--allow-unauthenticated`を必ず指定する。
 
-カスタムドメイン(`imasuggo5.com`、お名前.comで取得)をCloud Runのドメインマッピング機能で紐づけている。固定IPは使っていない(Cloud Runはそもそも固定IPという概念を持たず、ドメインマッピングだけなら追加コストなしで独自ドメインが使える。固定IPが本当に必要な場合はGlobal Load Balancerが必要になり、月$18程度の固定費が発生するため今回は不採用)。
+カスタムドメイン(`imasuggo5.com`、お名前.comで取得済み)への紐付けは検討したが見送った。Cloud Runの自動生成URL(`*.a.run.app`)のまま運用する。
+
+検索エンジンにインデックスされやすくする方針(見送ったドメイン紐付けとは独立の話)で、`frontend/index.html`に`description`/OGPメタタグ、`frontend/public/robots.txt`(`Allow: /`)を追加している。
 
 ## 環境メモ(Windows/ARM64)
 
