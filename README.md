@@ -287,32 +287,3 @@ Cloud Run上で life-sim-runtime として稼働
 ```
 
 「デプロイする権限を持つアカウント(`life-sim-deployer`)」と「実際にアプリが動く時のアカウント(`life-sim-runtime`)」を分離することで、被害範囲を最小化する設計にしている。
-
-### カスタムドメインの紐付け(`imasuggo5.com`)
-
-Cloud Runは固定IPという概念を持たないが、カスタムドメインのマッピング機能で独自ドメインに紐づけられる(追加コストなし)。
-
-**1. ドメイン所有権の確認**
-
-[Google Search Console](https://search.google.com/search-console)に、デプロイに使うのと同じGoogleアカウントで`imasuggo5.com`を登録し、所有権を確認する(お名前.comのDNS管理画面でTXTレコードを追加する形が一般的)。
-
-**2. ドメインマッピングを作成**
-
-```bash
-gcloud beta run domain-mappings create \
-  --service=life-sim \
-  --domain=imasuggo5.com \
-  --region=asia-northeast1
-```
-
-実行すると、設定すべきDNSレコード(ルートドメインなのでA/AAAAレコード)が出力される。
-
-**3. お名前.comのDNS設定にレコードを追加**
-
-お名前.comの管理画面(DNS設定/ネームサーバー設定)で、上記コマンドが出力したA/AAAAレコードをそのまま登録する。既存のレコード(特にAレコード)と競合しないよう注意する。
-
-**4. 反映を待つ**
-
-DNS反映(数分〜24時間程度)後、GoogleがマネージドSSL証明書を自動発行する。`gcloud beta run domain-mappings describe --domain=imasuggo5.com --region=asia-northeast1`で証明書の発行状況を確認できる。反映後は`https://imasuggo5.com`でアクセスできるようになる。
-
-`gh` CLIが無い場合は、GitHubリポジトリの Settings > Secrets and variables > Actions から手動で登録する(Variablesタブに`GCP_PROJECT_ID`・`GAR_LOCATION`、Secretsタブに`GCP_WORKLOAD_IDENTITY_PROVIDER`・`GCP_SERVICE_ACCOUNT`)。
