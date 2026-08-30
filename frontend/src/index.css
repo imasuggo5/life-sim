@@ -38,6 +38,7 @@ body {
 
 .life-plan-simulator__panel-left .form-row input {
   flex: 0 0 6rem;
+  min-width: 0;
 }
 
 .life-plan-simulator__panel-left .form-row--man-yen input {
