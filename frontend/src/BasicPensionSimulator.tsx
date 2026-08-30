@@ -18,14 +18,19 @@ interface ErrorResponse {
 }
 
 function BasicPensionSimulator() {
-  const [paidMonths, setPaidMonths] = useState(480);
-  const [claimAgeYears, setClaimAgeYears] = useState(DEFAULT_CLAIM_AGE_YEARS);
+  const [paidMonths, setPaidMonths] = useState<number | "">(480);
+  const [claimAgeYears, setClaimAgeYears] = useState<number | "">(
+    DEFAULT_CLAIM_AGE_YEARS,
+  );
   const [result, setResult] = useState<PensionAmount | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (paidMonths === "" || claimAgeYears === "") {
+      return;
+    }
     setIsLoading(true);
     setError(null);
     setResult(null);
@@ -67,7 +72,10 @@ function BasicPensionSimulator() {
             min={0}
             max={480}
             value={paidMonths}
-            onChange={(e) => setPaidMonths(Number(e.target.value))}
+            onChange={(e) => {
+              const value = e.target.value;
+              setPaidMonths(value === "" ? "" : Number(value));
+            }}
             required
           />
         </div>
@@ -79,7 +87,10 @@ function BasicPensionSimulator() {
             min={60}
             max={75}
             value={claimAgeYears}
-            onChange={(e) => setClaimAgeYears(Number(e.target.value))}
+            onChange={(e) => {
+              const value = e.target.value;
+              setClaimAgeYears(value === "" ? "" : Number(value));
+            }}
             required
           />
         </div>
