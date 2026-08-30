@@ -18,12 +18,9 @@ const MONTHS_PER_YEAR = 12;
 type WorkStyle = "employee" | "self_employed" | "dependent_spouse";
 
 const WORK_STYLE_OPTIONS: { value: WorkStyle; label: string }[] = [
-  { value: "employee", label: "会社員・公務員(厚生年金あり)" },
-  { value: "self_employed", label: "自営業・フリーランス・学生など" },
-  {
-    value: "dependent_spouse",
-    label: "配偶者の扶養に入っている(専業主婦・主夫等)",
-  },
+  { value: "employee", label: "会社員・公務員" },
+  { value: "self_employed", label: "自営業・フリーランス" },
+  { value: "dependent_spouse", label: "配偶者の扶養" },
 ];
 
 type NumberInput = number | "";
@@ -292,48 +289,36 @@ function LifePlanSimulator() {
             <fieldset>
               <legend>収入</legend>
               {decadeIncomes.map((decade, index) => (
-                <div key={decade.decadeStartAge}>
-                  <div className="form-row">
-                    <label htmlFor={`incomeManYen${decade.decadeStartAge}s`}>
-                      {decade.label}の年収
-                    </label>
-                    <input
-                      id={`incomeManYen${decade.decadeStartAge}s`}
-                      type="number"
-                      min={0}
-                      value={decade.incomeManYen}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        updateDecadeIncomeManYen(
-                          index,
-                          value === "" ? "" : Number(value),
-                        );
-                      }}
-                      required
-                    />
-                    <span className="unit">万円</span>
-                  </div>
-                  <div className="form-row">
-                    <label htmlFor={`workStyle${decade.decadeStartAge}s`}>
-                      {decade.label}の働き方
-                    </label>
-                    <select
-                      id={`workStyle${decade.decadeStartAge}s`}
-                      value={decade.workStyle}
-                      onChange={(e) => {
-                        updateDecadeWorkStyle(
-                          index,
-                          e.target.value as WorkStyle,
-                        );
-                      }}
-                    >
-                      {WORK_STYLE_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                <div className="decade-row" key={decade.decadeStartAge}>
+                  <span className="decade-row__label">{decade.label}</span>
+                  <select
+                    aria-label={`${decade.label}の働き方`}
+                    value={decade.workStyle}
+                    onChange={(e) => {
+                      updateDecadeWorkStyle(index, e.target.value as WorkStyle);
+                    }}
+                  >
+                    {WORK_STYLE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    aria-label={`${decade.label}の年収`}
+                    type="number"
+                    min={0}
+                    value={decade.incomeManYen}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      updateDecadeIncomeManYen(
+                        index,
+                        value === "" ? "" : Number(value),
+                      );
+                    }}
+                    required
+                  />
+                  <span className="unit">万円</span>
                 </div>
               ))}
               <div className="form-row">
