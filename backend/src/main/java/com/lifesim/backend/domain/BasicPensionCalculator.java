@@ -1,5 +1,6 @@
 package com.lifesim.backend.domain;
 
+import java.time.LocalDate;
 import org.springframework.stereotype.Component;
 
 /**
@@ -56,6 +57,9 @@ public class BasicPensionCalculator {
 
   private static final int MONTHS_PER_YEAR = 12;
 
+  /** この計算が基づく制度の施行日。令和8年度分の年金額はこの日付から適用されている。 */
+  static final LocalDate EFFECTIVE_DATE = LocalDate.of(2026, 4, 1);
+
   /**
    * 受給資格期間・受給開始年齢から年金額を計算する。
    *
@@ -81,7 +85,8 @@ public class BasicPensionCalculator {
     }
 
     if (paidMonths < MINIMUM_ELIGIBLE_MONTHS) {
-      return new BasicPensionResult(eligibilityPeriod, claimAge, new PensionAmount(0, 0));
+      return new BasicPensionResult(
+          eligibilityPeriod, claimAge, new PensionAmount(0, 0), EFFECTIVE_DATE);
     }
 
     int offsetMonths = (claimAgeYears - STANDARD_CLAIM_AGE_YEARS) * MONTHS_PER_YEAR;
@@ -96,6 +101,9 @@ public class BasicPensionCalculator {
     long monthlyAmountYen = Math.round(annualAmountYen / (double) MONTHS_PER_YEAR);
 
     return new BasicPensionResult(
-        eligibilityPeriod, claimAge, new PensionAmount(annualAmountYen, monthlyAmountYen));
+        eligibilityPeriod,
+        claimAge,
+        new PensionAmount(annualAmountYen, monthlyAmountYen),
+        EFFECTIVE_DATE);
   }
 }
