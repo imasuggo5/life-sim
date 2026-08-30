@@ -37,12 +37,38 @@ body {
 }
 
 .life-plan-simulator__panel-left .form-row input {
-  flex: 1 1 auto;
+  flex: 0 0 6rem;
+  min-width: 0;
 }
 
 .life-plan-simulator__panel-left .form-row .unit {
   flex: 0 0 auto;
   margin-left: 0.5rem;
+}
+
+.decade-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.decade-row__label {
+  flex: 0 0 2.5rem;
+}
+
+.decade-row select {
+  flex: 0 0 11rem;
+  min-width: 0;
+}
+
+.decade-row input {
+  flex: 0 0 5rem;
+  min-width: 0;
+}
+
+.decade-row .unit {
+  flex: 0 0 auto;
 }
 
 .life-plan-simulator__tooltip {
