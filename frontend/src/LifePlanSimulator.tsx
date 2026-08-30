@@ -142,7 +142,6 @@ interface NumberFieldProps {
   id: string;
   label: string;
   unit: string;
-  variant: "man-yen" | "age" | "months";
   value: NumberInput;
   onChange: (value: NumberInput) => void;
   min?: number;
@@ -154,14 +153,13 @@ function NumberField({
   id,
   label,
   unit,
-  variant,
   value,
   onChange,
   min,
   max,
 }: NumberFieldProps) {
   return (
-    <div className={`form-row form-row--${variant}`}>
+    <div className="form-row">
       <label htmlFor={id}>{label}</label>
       <input
         id={id}
@@ -180,18 +178,18 @@ function NumberField({
   );
 }
 
-type UnitFieldProps = Omit<NumberFieldProps, "unit" | "variant">;
+type UnitFieldProps = Omit<NumberFieldProps, "unit">;
 
 function ManYenField(props: UnitFieldProps) {
-  return <NumberField {...props} unit="万円" variant="man-yen" />;
+  return <NumberField {...props} unit="万円" />;
 }
 
 function AgeField(props: UnitFieldProps) {
-  return <NumberField {...props} unit="歳" variant="age" />;
+  return <NumberField {...props} unit="歳" />;
 }
 
 function MonthsField(props: UnitFieldProps) {
-  return <NumberField {...props} unit="カ月" variant="months" />;
+  return <NumberField {...props} unit="カ月" />;
 }
 
 function LifePlanSimulator() {
