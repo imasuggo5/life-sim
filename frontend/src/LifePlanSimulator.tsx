@@ -13,6 +13,7 @@ import {
 const DEFAULT_CLAIM_AGE_YEARS = 65;
 const SIMULATION_END_AGE = 100;
 const YEN_PER_MAN_YEN = 10_000;
+const MONTHS_PER_YEAR = 12;
 
 interface BasicPensionResponse {
   pensionAmount: {
@@ -37,12 +38,12 @@ function LifePlanSimulator() {
     useState<NumberInput>(1200);
   const [annualIncomeManYen, setAnnualIncomeManYen] =
     useState<NumberInput>(600);
-  const [livingExpenseManYen, setLivingExpenseManYen] =
-    useState<NumberInput>(200);
-  const [housingExpenseManYen, setHousingExpenseManYen] =
-    useState<NumberInput>(100);
-  const [insurancePremiumManYen, setInsurancePremiumManYen] =
-    useState<NumberInput>(150);
+  const [livingExpenseManYenPerMonth, setLivingExpenseManYenPerMonth] =
+    useState<NumberInput>(17);
+  const [housingExpenseManYenPerMonth, setHousingExpenseManYenPerMonth] =
+    useState<NumberInput>(8);
+  const [insurancePremiumManYenPerMonth, setInsurancePremiumManYenPerMonth] =
+    useState<NumberInput>(13);
   const [paidMonths, setPaidMonths] = useState<NumberInput>(480);
   const [claimAgeYears, setClaimAgeYears] = useState<NumberInput>(
     DEFAULT_CLAIM_AGE_YEARS,
@@ -58,9 +59,9 @@ function LifePlanSimulator() {
       currentAge === "" ||
       currentSavingsManYen === "" ||
       annualIncomeManYen === "" ||
-      livingExpenseManYen === "" ||
-      housingExpenseManYen === "" ||
-      insurancePremiumManYen === "" ||
+      livingExpenseManYenPerMonth === "" ||
+      housingExpenseManYenPerMonth === "" ||
+      insurancePremiumManYenPerMonth === "" ||
       paidMonths === "" ||
       claimAgeYears === ""
     ) {
@@ -94,7 +95,10 @@ function LifePlanSimulator() {
       // 誤差が蓄積しないよう、内部の計算は円単位のまま行う。
       const annualIncomeYen = annualIncomeManYen * YEN_PER_MAN_YEN;
       const annualExpenseYen =
-        (livingExpenseManYen + housingExpenseManYen + insurancePremiumManYen) *
+        (livingExpenseManYenPerMonth +
+          housingExpenseManYenPerMonth +
+          insurancePremiumManYenPerMonth) *
+        MONTHS_PER_YEAR *
         YEN_PER_MAN_YEN;
 
       const points: ChartPoint[] = [];
@@ -122,121 +126,153 @@ function LifePlanSimulator() {
       <div className="life-plan-simulator__panels">
         <div className="life-plan-simulator__panel-left">
           <form onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="currentAge">現在年齢</label>
-              <input
-                id="currentAge"
-                type="number"
-                min={0}
-                max={120}
-                value={currentAge}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setCurrentAge(value === "" ? "" : Number(value));
-                }}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="currentSavingsManYen">現在の貯蓄額(万円)</label>
-              <input
-                id="currentSavingsManYen"
-                type="number"
-                min={0}
-                value={currentSavingsManYen}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setCurrentSavingsManYen(value === "" ? "" : Number(value));
-                }}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="annualIncomeManYen">平均年収(年間、万円)</label>
-              <input
-                id="annualIncomeManYen"
-                type="number"
-                min={0}
-                value={annualIncomeManYen}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setAnnualIncomeManYen(value === "" ? "" : Number(value));
-                }}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="livingExpenseManYen">生活費(年間、万円)</label>
-              <input
-                id="livingExpenseManYen"
-                type="number"
-                min={0}
-                value={livingExpenseManYen}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setLivingExpenseManYen(value === "" ? "" : Number(value));
-                }}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="housingExpenseManYen">住宅費(年間、万円)</label>
-              <input
-                id="housingExpenseManYen"
-                type="number"
-                min={0}
-                value={housingExpenseManYen}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setHousingExpenseManYen(value === "" ? "" : Number(value));
-                }}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="insurancePremiumManYen">保険料(年間、万円)</label>
-              <input
-                id="insurancePremiumManYen"
-                type="number"
-                min={0}
-                value={insurancePremiumManYen}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setInsurancePremiumManYen(value === "" ? "" : Number(value));
-                }}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="paidMonths">保険料納付済月数(0〜480ヶ月)</label>
-              <input
-                id="paidMonths"
-                type="number"
-                min={0}
-                max={480}
-                value={paidMonths}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setPaidMonths(value === "" ? "" : Number(value));
-                }}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="claimAgeYears">受給開始年齢(60〜75歳)</label>
-              <input
-                id="claimAgeYears"
-                type="number"
-                min={60}
-                max={75}
-                value={claimAgeYears}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setClaimAgeYears(value === "" ? "" : Number(value));
-                }}
-                required
-              />
-            </div>
+            <fieldset>
+              <legend>基本情報</legend>
+              <div className="form-row">
+                <label htmlFor="currentAge">現在年齢</label>
+                <input
+                  id="currentAge"
+                  type="number"
+                  min={0}
+                  max={120}
+                  value={currentAge}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCurrentAge(value === "" ? "" : Number(value));
+                  }}
+                  required
+                />
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>収入</legend>
+              <div className="form-row">
+                <label htmlFor="annualIncomeManYen">平均年収(年間、万円)</label>
+                <input
+                  id="annualIncomeManYen"
+                  type="number"
+                  min={0}
+                  value={annualIncomeManYen}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setAnnualIncomeManYen(value === "" ? "" : Number(value));
+                  }}
+                  required
+                />
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>収支</legend>
+              <div className="form-row">
+                <label htmlFor="livingExpenseManYenPerMonth">
+                  生活費(月額、万円)
+                </label>
+                <input
+                  id="livingExpenseManYenPerMonth"
+                  type="number"
+                  min={0}
+                  value={livingExpenseManYenPerMonth}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setLivingExpenseManYenPerMonth(
+                      value === "" ? "" : Number(value),
+                    );
+                  }}
+                  required
+                />
+              </div>
+              <div className="form-row">
+                <label htmlFor="housingExpenseManYenPerMonth">
+                  住宅費(月額、万円)
+                </label>
+                <input
+                  id="housingExpenseManYenPerMonth"
+                  type="number"
+                  min={0}
+                  value={housingExpenseManYenPerMonth}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setHousingExpenseManYenPerMonth(
+                      value === "" ? "" : Number(value),
+                    );
+                  }}
+                  required
+                />
+              </div>
+              <div className="form-row">
+                <label htmlFor="insurancePremiumManYenPerMonth">
+                  保険料(月額、万円)
+                </label>
+                <input
+                  id="insurancePremiumManYenPerMonth"
+                  type="number"
+                  min={0}
+                  value={insurancePremiumManYenPerMonth}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setInsurancePremiumManYenPerMonth(
+                      value === "" ? "" : Number(value),
+                    );
+                  }}
+                  required
+                />
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>資産</legend>
+              <div className="form-row">
+                <label htmlFor="currentSavingsManYen">現在の貯蓄額(万円)</label>
+                <input
+                  id="currentSavingsManYen"
+                  type="number"
+                  min={0}
+                  value={currentSavingsManYen}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCurrentSavingsManYen(value === "" ? "" : Number(value));
+                  }}
+                  required
+                />
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>年金</legend>
+              <div className="form-row">
+                <label htmlFor="paidMonths">保険料納付済月数(0〜480ヶ月)</label>
+                <input
+                  id="paidMonths"
+                  type="number"
+                  min={0}
+                  max={480}
+                  value={paidMonths}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setPaidMonths(value === "" ? "" : Number(value));
+                  }}
+                  required
+                />
+              </div>
+              <div className="form-row">
+                <label htmlFor="claimAgeYears">受給開始年齢(60〜75歳)</label>
+                <input
+                  id="claimAgeYears"
+                  type="number"
+                  min={60}
+                  max={75}
+                  value={claimAgeYears}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setClaimAgeYears(value === "" ? "" : Number(value));
+                  }}
+                  required
+                />
+              </div>
+            </fieldset>
+
             <button type="submit" disabled={isLoading}>
               {isLoading ? "計算中..." : "シミュレーション"}
             </button>

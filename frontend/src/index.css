@@ -21,3 +21,21 @@ body {
   flex: 1 1 auto;
   min-width: 0;
 }
+
+.life-plan-simulator__panel-left fieldset {
+  margin-bottom: 1rem;
+}
+
+.life-plan-simulator__panel-left .form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.life-plan-simulator__panel-left .form-row label {
+  flex: 0 0 12rem;
+}
+
+.life-plan-simulator__panel-left .form-row input {
+  flex: 1 1 auto;
+}
