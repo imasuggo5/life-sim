@@ -378,6 +378,26 @@ function LifePlanSimulator() {
             </fieldset>
 
             <fieldset>
+              <legend>年金</legend>
+              <MonthsField
+                id="paidMonths"
+                label="保険料納付済月数"
+                min={0}
+                max={480}
+                value={paidMonths}
+                onChange={setPaidMonths}
+              />
+              <AgeField
+                id="claimAgeYears"
+                label="受給開始年齢"
+                min={60}
+                max={75}
+                value={claimAgeYears}
+                onChange={setClaimAgeYears}
+              />
+            </fieldset>
+
+            <fieldset>
               <legend>収支</legend>
               <ManYenField
                 id="livingExpenseManYenPerMonth"
@@ -410,26 +430,6 @@ function LifePlanSimulator() {
                 min={0}
                 value={currentSavingsManYen}
                 onChange={setCurrentSavingsManYen}
-              />
-            </fieldset>
-
-            <fieldset>
-              <legend>年金</legend>
-              <MonthsField
-                id="paidMonths"
-                label="保険料納付済月数"
-                min={0}
-                max={480}
-                value={paidMonths}
-                onChange={setPaidMonths}
-              />
-              <AgeField
-                id="claimAgeYears"
-                label="受給開始年齢"
-                min={60}
-                max={75}
-                value={claimAgeYears}
-                onChange={setClaimAgeYears}
               />
             </fieldset>
 

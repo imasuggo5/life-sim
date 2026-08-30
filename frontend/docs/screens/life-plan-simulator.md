@@ -13,16 +13,18 @@
 
 ## 入力項目(左パネル、セクション構成)
 
+セクションの並び順は「基本情報→収入→年金→収支→資産」とする。
+
 | セクション | 項目             | フィールド名                     | 型      | 単位(右表示) | 制約                 |
 | ---------- | ---------------- | -------------------------------- | ------- | ------------ | -------------------- |
 | 基本情報   | 現在年齢         | `currentAge`                     | integer | 歳           | 0〜120               |
 | 収入       | (下表参照)       | -                                | -       | -            | -                    |
+| 年金       | 保険料納付済月数 | `paidMonths`                     | integer | ヶ月         | 0〜480               |
+| 年金       | 受給開始年齢     | `claimAgeYears`                  | integer | 歳           | 60〜75(デフォルト65) |
 | 収支       | 生活費(月額)     | `livingExpenseManYenPerMonth`    | integer | 万円         | 0以上                |
 | 収支       | 住宅費(月額)     | `housingExpenseManYenPerMonth`   | integer | 万円         | 0以上                |
 | 収支       | 保険料(月額)     | `insurancePremiumManYenPerMonth` | integer | 万円         | 0以上                |
 | 資産       | 現在の貯蓄額     | `currentSavingsManYen`           | integer | 万円         | 0以上                |
-| 年金       | 保険料納付済月数 | `paidMonths`                     | integer | ヶ月         | 0〜480               |
-| 年金       | 受給開始年齢     | `claimAgeYears`                  | integer | 歳           | 60〜75(デフォルト65) |
 
 支出は「生活費」「住宅費」「保険料」の3項目に月額で入力し、12倍した合計を年間支出として扱う。
 
