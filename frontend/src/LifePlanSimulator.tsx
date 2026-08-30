@@ -38,6 +38,7 @@ function LifePlanSimulator() {
     useState<NumberInput>(1200);
   const [annualIncomeManYen, setAnnualIncomeManYen] =
     useState<NumberInput>(600);
+  const [retirementAge, setRetirementAge] = useState<NumberInput>(65);
   const [livingExpenseManYenPerMonth, setLivingExpenseManYenPerMonth] =
     useState<NumberInput>(17);
   const [housingExpenseManYenPerMonth, setHousingExpenseManYenPerMonth] =
@@ -59,6 +60,7 @@ function LifePlanSimulator() {
       currentAge === "" ||
       currentSavingsManYen === "" ||
       annualIncomeManYen === "" ||
+      retirementAge === "" ||
       livingExpenseManYenPerMonth === "" ||
       housingExpenseManYenPerMonth === "" ||
       insurancePremiumManYenPerMonth === "" ||
@@ -105,8 +107,14 @@ function LifePlanSimulator() {
       let savingsYen = currentSavingsManYen * YEN_PER_MAN_YEN;
       for (let age = currentAge; age <= SIMULATION_END_AGE; age++) {
         if (age > currentAge) {
+          // 退職年齢までは年収、退職後は年金開始年齢に達するまで収入0円、
+          // 年金開始年齢以降は年金額とする(退職と年金受給の重複は考慮しない)。
           const incomeYen =
-            age < claimAgeYears ? annualIncomeYen : pensionAnnualAmountYen;
+            age < retirementAge
+              ? annualIncomeYen
+              : age >= claimAgeYears
+                ? pensionAnnualAmountYen
+                : 0;
           savingsYen += incomeYen - annualExpenseYen;
         }
         points.push({ age, savingsManYen: savingsYen / YEN_PER_MAN_YEN });
@@ -162,6 +170,22 @@ function LifePlanSimulator() {
                   required
                 />
                 <span className="unit">万円</span>
+              </div>
+              <div className="form-row">
+                <label htmlFor="retirementAge">退職年齢</label>
+                <input
+                  id="retirementAge"
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={retirementAge}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setRetirementAge(value === "" ? "" : Number(value));
+                  }}
+                  required
+                />
+                <span className="unit">歳</span>
               </div>
             </fieldset>
 

@@ -17,6 +17,7 @@
 | ---------- | ---------------- | -------------------------------- | ------- | ------------ | -------------------- |
 | 基本情報   | 現在年齢         | `currentAge`                     | integer | 歳           | 0〜120               |
 | 収入       | 平均年収         | `annualIncomeManYen`             | integer | 万円         | 0以上                |
+| 収入       | 退職年齢         | `retirementAge`                  | integer | 歳           | 0〜100(デフォルト65) |
 | 収支       | 生活費(月額)     | `livingExpenseManYenPerMonth`    | integer | 万円         | 0以上                |
 | 収支       | 住宅費(月額)     | `housingExpenseManYenPerMonth`   | integer | 万円         | 0以上                |
 | 収支       | 保険料(月額)     | `insurancePremiumManYenPerMonth` | integer | 万円         | 0以上                |
@@ -39,7 +40,10 @@
    - `annualExpenseYen = (livingExpenseManYenPerMonth + housingExpenseManYenPerMonth + insurancePremiumManYenPerMonth) × 12 × 10,000`
 3. 年齢`currentAge`〜`100`について、累積貯蓄額(円)を計算する:
    - `cumulative[currentAge] = currentSavingsYen`
-   - 各年齢について、`age < claimAgeYears`なら収入=`annualIncomeYen`、`age >= claimAgeYears`なら収入=年金の年額
+   - 各年齢の収入は次のいずれか(退職と年金受給の重複は考慮しない簡易計算):
+     - `age < retirementAge`: `annualIncomeYen`(在職中)
+     - `retirementAge <= age かつ age < claimAgeYears`: `0`(退職済みだが年金受給前)
+     - `age >= claimAgeYears`: 年金の年額(受給開始後)
    - `cumulative[age] = cumulative[age - 1] + 収入 - annualExpenseYen`
 4. 表示直前に万円へ変換(`÷ 10,000`)し、横軸=年齢、縦軸=累積貯蓄額(万円)の折れ線グラフとして表示する。グラフには0万円のラインを強調表示する(赤色の基準線)。
 
