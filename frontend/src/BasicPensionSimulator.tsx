@@ -11,6 +11,7 @@ interface BasicPensionResponse {
   eligibilityPeriod: { paidMonths: number };
   claimAge: { years: number };
   pensionAmount: PensionAmount;
+  effectiveDate: string;
 }
 
 interface ErrorResponse {
@@ -22,7 +23,7 @@ function BasicPensionSimulator() {
   const [claimAgeYears, setClaimAgeYears] = useState<number | "">(
     DEFAULT_CLAIM_AGE_YEARS,
   );
-  const [result, setResult] = useState<PensionAmount | null>(null);
+  const [result, setResult] = useState<BasicPensionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -52,7 +53,7 @@ function BasicPensionSimulator() {
         return;
       }
 
-      setResult((data as BasicPensionResponse).pensionAmount);
+      setResult(data as BasicPensionResponse);
     } catch {
       setError("通信に失敗しました");
     } finally {
@@ -102,12 +103,15 @@ function BasicPensionSimulator() {
       {error && <p role="alert">{error}</p>}
 
       {result && (
-        <dl>
-          <dt>年金額(年額)</dt>
-          <dd>{result.annualAmountYen.toLocaleString()}円</dd>
-          <dt>年金額(月額)</dt>
-          <dd>{result.monthlyAmountYen.toLocaleString()}円</dd>
-        </dl>
+        <>
+          <dl>
+            <dt>年金額(年額)</dt>
+            <dd>{result.pensionAmount.annualAmountYen.toLocaleString()}円</dd>
+            <dt>年金額(月額)</dt>
+            <dd>{result.pensionAmount.monthlyAmountYen.toLocaleString()}円</dd>
+          </dl>
+          <p>※{result.effectiveDate}時点の制度に基づく試算です。</p>
+        </>
       )}
     </section>
   );

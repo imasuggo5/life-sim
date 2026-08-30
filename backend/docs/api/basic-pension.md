@@ -44,9 +44,14 @@ Content-Type: application/json
 {
   "eligibilityPeriod": { "paidMonths": 480 },
   "claimAge": { "years": 65 },
-  "pensionAmount": { "annualAmountYen": 847300, "monthlyAmountYen": 70608 }
+  "pensionAmount": { "annualAmountYen": 847300, "monthlyAmountYen": 70608 },
+  "effectiveDate": "2026-04-01"
 }
 ```
+
+| フィールド | 型 | 説明 |
+| --- | --- | --- |
+| `effectiveDate` | string (ISO 8601 date) | この計算が基づく制度の施行日。令和8年度分の年金額はこの日付から適用されている。 |
 
 #### 例: 60歳受給(5年繰り上げ)
 
@@ -62,7 +67,8 @@ Content-Type: application/json
 {
   "eligibilityPeriod": { "paidMonths": 480 },
   "claimAge": { "years": 60 },
-  "pensionAmount": { "annualAmountYen": 643948, "monthlyAmountYen": 53662 }
+  "pensionAmount": { "annualAmountYen": 643948, "monthlyAmountYen": 53662 },
+  "effectiveDate": "2026-04-01"
 }
 ```
 
@@ -74,7 +80,8 @@ Content-Type: application/json
 {
   "eligibilityPeriod": { "paidMonths": 480 },
   "claimAge": { "years": 70 },
-  "pensionAmount": { "annualAmountYen": 1203166, "monthlyAmountYen": 100264 }
+  "pensionAmount": { "annualAmountYen": 1203166, "monthlyAmountYen": 100264 },
+  "effectiveDate": "2026-04-01"
 }
 ```
 
@@ -92,7 +99,8 @@ Content-Type: application/json
 {
   "eligibilityPeriod": { "paidMonths": 119 },
   "claimAge": { "years": 65 },
-  "pensionAmount": { "annualAmountYen": 0, "monthlyAmountYen": 0 }
+  "pensionAmount": { "annualAmountYen": 0, "monthlyAmountYen": 0 },
+  "effectiveDate": "2026-04-01"
 }
 ```
 

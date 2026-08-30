@@ -3,6 +3,7 @@ package com.lifesim.backend.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
 /** Tests for {@link BasicPensionCalculator}. */
@@ -18,6 +19,7 @@ class BasicPensionCalculatorTest {
     assertThat(result.claimAge().years()).isEqualTo(65);
     assertThat(result.pensionAmount().annualAmountYen()).isEqualTo(847_300);
     assertThat(result.pensionAmount().monthlyAmountYen()).isEqualTo(70_608);
+    assertThat(result.effectiveDate()).isEqualTo(LocalDate.of(2026, 4, 1));
   }
 
   @Test
