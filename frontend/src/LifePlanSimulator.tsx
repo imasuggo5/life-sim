@@ -11,6 +11,7 @@ import {
 
 const DEFAULT_CLAIM_AGE_YEARS = 65;
 const SIMULATION_END_AGE = 100;
+const YEN_PER_MAN_YEN = 10_000;
 
 interface BasicPensionResponse {
   pensionAmount: {
@@ -24,18 +25,19 @@ interface ErrorResponse {
 
 interface ChartPoint {
   age: number;
-  savingsYen: number;
+  savingsManYen: number;
 }
 
 type NumberInput = number | "";
 
 function LifePlanSimulator() {
   const [currentAge, setCurrentAge] = useState<NumberInput>(30);
-  const [currentSavingsYen, setCurrentSavingsYen] = useState<NumberInput>(0);
-  const [annualIncomeYen, setAnnualIncomeYen] =
-    useState<NumberInput>(4_000_000);
-  const [annualExpenseYen, setAnnualExpenseYen] =
-    useState<NumberInput>(3_000_000);
+  const [currentSavingsManYen, setCurrentSavingsManYen] =
+    useState<NumberInput>(0);
+  const [annualIncomeManYen, setAnnualIncomeManYen] =
+    useState<NumberInput>(400);
+  const [annualExpenseManYen, setAnnualExpenseManYen] =
+    useState<NumberInput>(300);
   const [paidMonths, setPaidMonths] = useState<NumberInput>(480);
   const [claimAgeYears, setClaimAgeYears] = useState<NumberInput>(
     DEFAULT_CLAIM_AGE_YEARS,
@@ -49,9 +51,9 @@ function LifePlanSimulator() {
     e.preventDefault();
     if (
       currentAge === "" ||
-      currentSavingsYen === "" ||
-      annualIncomeYen === "" ||
-      annualExpenseYen === "" ||
+      currentSavingsManYen === "" ||
+      annualIncomeManYen === "" ||
+      annualExpenseManYen === "" ||
       paidMonths === "" ||
       claimAgeYears === ""
     ) {
@@ -82,15 +84,19 @@ function LifePlanSimulator() {
       const pensionAnnualAmountYen = (data as BasicPensionResponse)
         .pensionAmount.annualAmountYen;
 
+      // 誤差が蓄積しないよう、内部の計算は円単位のまま行う。
+      const annualIncomeYen = annualIncomeManYen * YEN_PER_MAN_YEN;
+      const annualExpenseYen = annualExpenseManYen * YEN_PER_MAN_YEN;
+
       const points: ChartPoint[] = [];
-      let savingsYen = currentSavingsYen;
+      let savingsYen = currentSavingsManYen * YEN_PER_MAN_YEN;
       for (let age = currentAge; age <= SIMULATION_END_AGE; age++) {
         if (age > currentAge) {
           const incomeYen =
             age < claimAgeYears ? annualIncomeYen : pensionAnnualAmountYen;
           savingsYen += incomeYen - annualExpenseYen;
         }
-        points.push({ age, savingsYen });
+        points.push({ age, savingsManYen: savingsYen / YEN_PER_MAN_YEN });
       }
 
       setChartData(points);
@@ -123,43 +129,43 @@ function LifePlanSimulator() {
               />
             </div>
             <div>
-              <label htmlFor="currentSavingsYen">現在の貯蓄額(円)</label>
+              <label htmlFor="currentSavingsManYen">現在の貯蓄額(万円)</label>
               <input
-                id="currentSavingsYen"
+                id="currentSavingsManYen"
                 type="number"
                 min={0}
-                value={currentSavingsYen}
+                value={currentSavingsManYen}
                 onChange={(e) => {
                   const value = e.target.value;
-                  setCurrentSavingsYen(value === "" ? "" : Number(value));
+                  setCurrentSavingsManYen(value === "" ? "" : Number(value));
                 }}
                 required
               />
             </div>
             <div>
-              <label htmlFor="annualIncomeYen">平均年収(年間、円)</label>
+              <label htmlFor="annualIncomeManYen">平均年収(年間、万円)</label>
               <input
-                id="annualIncomeYen"
+                id="annualIncomeManYen"
                 type="number"
                 min={0}
-                value={annualIncomeYen}
+                value={annualIncomeManYen}
                 onChange={(e) => {
                   const value = e.target.value;
-                  setAnnualIncomeYen(value === "" ? "" : Number(value));
+                  setAnnualIncomeManYen(value === "" ? "" : Number(value));
                 }}
                 required
               />
             </div>
             <div>
-              <label htmlFor="annualExpenseYen">支出(年間、円)</label>
+              <label htmlFor="annualExpenseManYen">支出(年間、万円)</label>
               <input
-                id="annualExpenseYen"
+                id="annualExpenseManYen"
                 type="number"
                 min={0}
-                value={annualExpenseYen}
+                value={annualExpenseManYen}
                 onChange={(e) => {
                   const value = e.target.value;
-                  setAnnualExpenseYen(value === "" ? "" : Number(value));
+                  setAnnualExpenseManYen(value === "" ? "" : Number(value));
                 }}
                 required
               />
@@ -214,18 +220,20 @@ function LifePlanSimulator() {
                 <YAxis
                   tickFormatter={(value: number) => value.toLocaleString()}
                   label={{
-                    value: "累積貯蓄額(円)",
+                    value: "累積貯蓄額(万円)",
                     angle: -90,
                     position: "insideLeft",
                   }}
                 />
                 <Tooltip
-                  formatter={(value) => `${Number(value).toLocaleString()}円`}
+                  formatter={(value) =>
+                    `${Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 })}万円`
+                  }
                   labelFormatter={(age) => `${age}歳`}
                 />
                 <Line
                   type="monotone"
-                  dataKey="savingsYen"
+                  dataKey="savingsManYen"
                   stroke="#3366cc"
                   dot={false}
                 />
