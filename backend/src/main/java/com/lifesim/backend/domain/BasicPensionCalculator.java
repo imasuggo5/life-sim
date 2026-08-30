@@ -12,8 +12,23 @@ import org.springframework.stereotype.Component;
 public class BasicPensionCalculator {
 
   /**
-   * 令和8年度(新規裁定者)の満額(年額、円)。毎年度改定される。確認日: 2026-08-30。 参照:
+   * 満額の計算の基準となる額(年額、円)。平成16年改正で定められた水準で、法律上はここに毎年度の改定率を乗じて満額が決まる。 参照:
    * https://www.nenkin.go.jp/oshirase/taisetu/kojin/2026/202604/0401.html
+   */
+  static final long BASE_AMOUNT_YEN = 780_900;
+
+  /**
+   * 令和8年度(新規裁定者)の改定率。毎年度改定される。確認日: 2026-08-30。 参照:
+   * https://www.nenkin.go.jp/oshirase/taisetu/kojin/2026/202604/0401.html
+   */
+  static final double REVISION_RATE = 1.085;
+
+  /**
+   * 令和8年度(新規裁定者)の満額(年額、円)。
+   *
+   * <p>本来は{@link #BASE_AMOUNT_YEN} × {@link #REVISION_RATE}
+   * で算出されるが、改定率は公表用に3桁へ丸めた値のため、単純に掛け算すると公式に公表されている満額(847,300円)とは一致しない(847,277円になる)。
+   * そのため、公式に公表されている満額をこの定数として直接保持する。
    */
   static final long FULL_ANNUAL_AMOUNT_YEN = 847_300;
 
