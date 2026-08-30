@@ -6,3 +6,18 @@ body {
   margin: 0;
   font-family: system-ui, sans-serif;
 }
+
+.life-plan-simulator__panels {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.life-plan-simulator__panel-left {
+  flex: 0 0 auto;
+}
+
+.life-plan-simulator__panel-right {
+  flex: 1 1 auto;
+  min-width: 0;
+}
