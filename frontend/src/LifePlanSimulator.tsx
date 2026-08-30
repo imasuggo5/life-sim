@@ -32,17 +32,17 @@ interface ChartPoint {
 type NumberInput = number | "";
 
 function LifePlanSimulator() {
-  const [currentAge, setCurrentAge] = useState<NumberInput>(30);
+  const [currentAge, setCurrentAge] = useState<NumberInput>(40);
   const [currentSavingsManYen, setCurrentSavingsManYen] =
-    useState<NumberInput>(0);
+    useState<NumberInput>(1200);
   const [annualIncomeManYen, setAnnualIncomeManYen] =
-    useState<NumberInput>(400);
+    useState<NumberInput>(600);
   const [livingExpenseManYen, setLivingExpenseManYen] =
-    useState<NumberInput>(180);
+    useState<NumberInput>(200);
   const [housingExpenseManYen, setHousingExpenseManYen] =
     useState<NumberInput>(100);
   const [insurancePremiumManYen, setInsurancePremiumManYen] =
-    useState<NumberInput>(20);
+    useState<NumberInput>(150);
   const [paidMonths, setPaidMonths] = useState<NumberInput>(480);
   const [claimAgeYears, setClaimAgeYears] = useState<NumberInput>(
     DEFAULT_CLAIM_AGE_YEARS,
