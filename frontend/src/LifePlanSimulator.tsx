@@ -28,9 +28,41 @@ interface ErrorResponse {
 interface ChartPoint {
   age: number;
   savingsManYen: number;
+  incomeManYen: number;
+  expenseManYen: number;
+  annualBalanceManYen: number;
 }
 
 type NumberInput = number | "";
+
+function formatManYen(value: number): string {
+  return `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })}万円`;
+}
+
+function ChartTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { payload: ChartPoint }[];
+  label?: number;
+}) {
+  if (!active || !payload || payload.length === 0) {
+    return null;
+  }
+  const point = payload[0].payload;
+
+  return (
+    <div className="life-plan-simulator__tooltip">
+      <p>{label}歳</p>
+      <p>収入: {formatManYen(point.incomeManYen)}</p>
+      <p>支出: {formatManYen(point.expenseManYen)}</p>
+      <p>年間収支: {formatManYen(point.annualBalanceManYen)}</p>
+      <p>累積貯蓄額: {formatManYen(point.savingsManYen)}</p>
+    </div>
+  );
+}
 
 function LifePlanSimulator() {
   const [currentAge, setCurrentAge] = useState<NumberInput>(40);
@@ -106,18 +138,24 @@ function LifePlanSimulator() {
       const points: ChartPoint[] = [];
       let savingsYen = currentSavingsManYen * YEN_PER_MAN_YEN;
       for (let age = currentAge; age <= SIMULATION_END_AGE; age++) {
+        // 退職年齢までは年収、退職後は年金開始年齢に達するまで収入0円、
+        // 年金開始年齢以降は年金額とする(退職と年金受給の重複は考慮しない)。
+        const incomeYen =
+          age < retirementAge
+            ? annualIncomeYen
+            : age >= claimAgeYears
+              ? pensionAnnualAmountYen
+              : 0;
         if (age > currentAge) {
-          // 退職年齢までは年収、退職後は年金開始年齢に達するまで収入0円、
-          // 年金開始年齢以降は年金額とする(退職と年金受給の重複は考慮しない)。
-          const incomeYen =
-            age < retirementAge
-              ? annualIncomeYen
-              : age >= claimAgeYears
-                ? pensionAnnualAmountYen
-                : 0;
           savingsYen += incomeYen - annualExpenseYen;
         }
-        points.push({ age, savingsManYen: savingsYen / YEN_PER_MAN_YEN });
+        points.push({
+          age,
+          savingsManYen: savingsYen / YEN_PER_MAN_YEN,
+          incomeManYen: incomeYen / YEN_PER_MAN_YEN,
+          expenseManYen: annualExpenseYen / YEN_PER_MAN_YEN,
+          annualBalanceManYen: (incomeYen - annualExpenseYen) / YEN_PER_MAN_YEN,
+        });
       }
 
       setChartData(points);
@@ -330,12 +368,7 @@ function LifePlanSimulator() {
                     position: "insideLeft",
                   }}
                 />
-                <Tooltip
-                  formatter={(value) =>
-                    `${Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 })}万円`
-                  }
-                  labelFormatter={(age) => `${age}歳`}
-                />
+                <Tooltip content={<ChartTooltip />} />
                 <ReferenceLine
                   y={0}
                   stroke="#cc3333"

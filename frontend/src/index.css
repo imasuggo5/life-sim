@@ -44,3 +44,15 @@ body {
   flex: 0 0 auto;
   margin-left: 0.5rem;
 }
+
+.life-plan-simulator__tooltip {
+  background: canvas;
+  color: canvastext;
+  border: 1px solid #999;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+}
+
+.life-plan-simulator__tooltip p {
+  margin: 0.15rem 0;
+}
