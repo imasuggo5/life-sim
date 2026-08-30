@@ -142,13 +142,14 @@ function LifePlanSimulator() {
                   }}
                   required
                 />
+                <span className="unit">歳</span>
               </div>
             </fieldset>
 
             <fieldset>
               <legend>収入</legend>
               <div className="form-row">
-                <label htmlFor="annualIncomeManYen">平均年収(年間、万円)</label>
+                <label htmlFor="annualIncomeManYen">平均年収</label>
                 <input
                   id="annualIncomeManYen"
                   type="number"
@@ -160,6 +161,7 @@ function LifePlanSimulator() {
                   }}
                   required
                 />
+                <span className="unit">万円</span>
               </div>
             </fieldset>
 
@@ -167,7 +169,7 @@ function LifePlanSimulator() {
               <legend>収支</legend>
               <div className="form-row">
                 <label htmlFor="livingExpenseManYenPerMonth">
-                  生活費(月額、万円)
+                  生活費(月額)
                 </label>
                 <input
                   id="livingExpenseManYenPerMonth"
@@ -182,10 +184,11 @@ function LifePlanSimulator() {
                   }}
                   required
                 />
+                <span className="unit">万円</span>
               </div>
               <div className="form-row">
                 <label htmlFor="housingExpenseManYenPerMonth">
-                  住宅費(月額、万円)
+                  住宅費(月額)
                 </label>
                 <input
                   id="housingExpenseManYenPerMonth"
@@ -200,10 +203,11 @@ function LifePlanSimulator() {
                   }}
                   required
                 />
+                <span className="unit">万円</span>
               </div>
               <div className="form-row">
                 <label htmlFor="insurancePremiumManYenPerMonth">
-                  保険料(月額、万円)
+                  保険料(月額)
                 </label>
                 <input
                   id="insurancePremiumManYenPerMonth"
@@ -218,13 +222,14 @@ function LifePlanSimulator() {
                   }}
                   required
                 />
+                <span className="unit">万円</span>
               </div>
             </fieldset>
 
             <fieldset>
               <legend>資産</legend>
               <div className="form-row">
-                <label htmlFor="currentSavingsManYen">現在の貯蓄額(万円)</label>
+                <label htmlFor="currentSavingsManYen">現在の貯蓄額</label>
                 <input
                   id="currentSavingsManYen"
                   type="number"
@@ -236,13 +241,14 @@ function LifePlanSimulator() {
                   }}
                   required
                 />
+                <span className="unit">万円</span>
               </div>
             </fieldset>
 
             <fieldset>
               <legend>年金</legend>
               <div className="form-row">
-                <label htmlFor="paidMonths">保険料納付済月数(0〜480ヶ月)</label>
+                <label htmlFor="paidMonths">保険料納付済月数</label>
                 <input
                   id="paidMonths"
                   type="number"
@@ -255,9 +261,10 @@ function LifePlanSimulator() {
                   }}
                   required
                 />
+                <span className="unit">ヶ月</span>
               </div>
               <div className="form-row">
-                <label htmlFor="claimAgeYears">受給開始年齢(60〜75歳)</label>
+                <label htmlFor="claimAgeYears">受給開始年齢</label>
                 <input
                   id="claimAgeYears"
                   type="number"
@@ -270,6 +277,7 @@ function LifePlanSimulator() {
                   }}
                   required
                 />
+                <span className="unit">歳</span>
               </div>
             </fieldset>
 

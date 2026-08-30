@@ -39,3 +39,8 @@ body {
 .life-plan-simulator__panel-left .form-row input {
   flex: 1 1 auto;
 }
+
+.life-plan-simulator__panel-left .form-row .unit {
+  flex: 0 0 auto;
+  margin-left: 0.5rem;
+}

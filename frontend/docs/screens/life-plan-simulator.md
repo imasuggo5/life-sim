@@ -9,20 +9,20 @@
 - 左パネル: 入力フォーム(セクションごとに`<fieldset>`でグルーピング)
 - 右パネル: シミュレーション結果(折れ線グラフ、Rechartsを使用)
 
-入力欄は1行にラベル+入力欄を並べ、ラベル部分の幅を固定することで全項目の入力欄の開始位置を揃える。
+入力欄は1行にラベル+入力欄+単位を並べる。ラベル部分の幅を固定することで全項目の入力欄の開始位置を揃え、単位(万円・歳・ヶ月)は入力欄の右側に表示する(ラベル文言には単位・範囲を含めない)。
 
 ## 入力項目(左パネル、セクション構成)
 
-| セクション | 項目             | フィールド名                     | 型      | 制約                 |
-| ---------- | ---------------- | -------------------------------- | ------- | -------------------- |
-| 基本情報   | 現在年齢         | `currentAge`                     | integer | 0〜120               |
-| 収入       | 平均年収(年間)   | `annualIncomeManYen`             | integer | 0以上(単位: 万円)    |
-| 収支       | 生活費(月額)     | `livingExpenseManYenPerMonth`    | integer | 0以上(単位: 万円)    |
-| 収支       | 住宅費(月額)     | `housingExpenseManYenPerMonth`   | integer | 0以上(単位: 万円)    |
-| 収支       | 保険料(月額)     | `insurancePremiumManYenPerMonth` | integer | 0以上(単位: 万円)    |
-| 資産       | 現在の貯蓄額     | `currentSavingsManYen`           | integer | 0以上(単位: 万円)    |
-| 年金       | 保険料納付済月数 | `paidMonths`                     | integer | 0〜480               |
-| 年金       | 受給開始年齢     | `claimAgeYears`                  | integer | 60〜75(デフォルト65) |
+| セクション | 項目             | フィールド名                     | 型      | 単位(右表示) | 制約                 |
+| ---------- | ---------------- | -------------------------------- | ------- | ------------ | -------------------- |
+| 基本情報   | 現在年齢         | `currentAge`                     | integer | 歳           | 0〜120               |
+| 収入       | 平均年収         | `annualIncomeManYen`             | integer | 万円         | 0以上                |
+| 収支       | 生活費(月額)     | `livingExpenseManYenPerMonth`    | integer | 万円         | 0以上                |
+| 収支       | 住宅費(月額)     | `housingExpenseManYenPerMonth`   | integer | 万円         | 0以上                |
+| 収支       | 保険料(月額)     | `insurancePremiumManYenPerMonth` | integer | 万円         | 0以上                |
+| 資産       | 現在の貯蓄額     | `currentSavingsManYen`           | integer | 万円         | 0以上                |
+| 年金       | 保険料納付済月数 | `paidMonths`                     | integer | ヶ月         | 0〜480               |
+| 年金       | 受給開始年齢     | `claimAgeYears`                  | integer | 歳           | 60〜75(デフォルト65) |
 
 支出は「生活費」「住宅費」「保険料」の3項目に月額で入力し、12倍した合計を年間支出として扱う。
 
