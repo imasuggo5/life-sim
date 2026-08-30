@@ -3,6 +3,7 @@ import {
   CartesianGrid,
   Line,
   LineChart,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -230,6 +231,16 @@ function LifePlanSimulator() {
                     `${Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 })}万円`
                   }
                   labelFormatter={(age) => `${age}歳`}
+                />
+                <ReferenceLine
+                  y={0}
+                  stroke="#cc3333"
+                  strokeWidth={2}
+                  label={{
+                    value: "0万円",
+                    position: "insideBottomLeft",
+                    fill: "#cc3333",
+                  }}
                 />
                 <Line
                   type="monotone"
