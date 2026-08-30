@@ -2,7 +2,7 @@ package com.lifesim.backend.domain;
 
 import org.springframework.stereotype.Component;
 
-/** 老齢基礎年金を簡易計算式(満額 × 保険料納付済月数 ÷ 480ヶ月)で算出する。免除期間は考慮せず、保険料納付済月数のみを扱う。 */
+/** 老齢基礎年金を簡易計算式(満額 × 保険料納付済月数 ÷ 480ヶ月)で算出する。免除期間は考慮せず、保険料納付済月数のみを扱う。受給資格期間(120ヶ月)未満の場合は年金額を0とする。 */
 @Component
 public class BasicPensionCalculator {
 
@@ -15,17 +15,24 @@ public class BasicPensionCalculator {
   /** 満額となる納付済月数(40年 = 480ヶ月)。 */
   static final int FULL_CONTRIBUTION_MONTHS = 480;
 
+  /** 受給資格期間(10年 = 120ヶ月)。これに満たない場合は年金額が発生しない。 */
+  static final int MINIMUM_ELIGIBLE_MONTHS = 120;
+
   /**
    * 保険料納付済月数から年金額を計算する。
    *
    * @param paidMonths 保険料納付済月数(0〜{@value #FULL_CONTRIBUTION_MONTHS})
-   * @return 計算結果
+   * @return 計算結果。paidMonthsが{@value #MINIMUM_ELIGIBLE_MONTHS}未満の場合は年金額0
    * @throws IllegalArgumentException paidMonthsが範囲外の場合
    */
   public BasicPensionResult calculate(int paidMonths) {
     if (paidMonths < 0 || paidMonths > FULL_CONTRIBUTION_MONTHS) {
       throw new IllegalArgumentException(
           "paidMonths must be between 0 and " + FULL_CONTRIBUTION_MONTHS);
+    }
+
+    if (paidMonths < MINIMUM_ELIGIBLE_MONTHS) {
+      return new BasicPensionResult(paidMonths, 0, 0);
     }
 
     long annualAmountYen =

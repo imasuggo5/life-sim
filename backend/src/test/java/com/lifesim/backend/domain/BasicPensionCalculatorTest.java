@@ -35,6 +35,23 @@ class BasicPensionCalculatorTest {
   }
 
   @Test
+  void belowMinimumEligibleMonthsReturnsZero() {
+    BasicPensionResult result = calculator.calculate(119);
+
+    assertThat(result.paidMonths()).isEqualTo(119);
+    assertThat(result.annualAmountYen()).isZero();
+    assertThat(result.monthlyAmountYen()).isZero();
+  }
+
+  @Test
+  void minimumEligibleMonthsReturnsCalculatedAmount() {
+    BasicPensionResult result = calculator.calculate(120);
+
+    assertThat(result.annualAmountYen()).isEqualTo(211_825);
+    assertThat(result.monthlyAmountYen()).isEqualTo(17_652);
+  }
+
+  @Test
   void negativeMonthsIsRejected() {
     assertThatThrownBy(() -> calculator.calculate(-1)).isInstanceOf(IllegalArgumentException.class);
   }

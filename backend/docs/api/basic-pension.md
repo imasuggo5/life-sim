@@ -5,6 +5,7 @@
 ## 前提・制約
 
 - 免除期間・猶予期間の考慮はしない簡易計算(保険料納付済月数のみを扱う)。
+- 受給資格期間は120ヶ月(10年)以上を要件とする。`paidMonths`が120未満の場合は年金額を`0`とする(受給要件を満たすかどうかはレスポンスの`paidMonths`から`paidMonths >= 120`で判定可能なため、専用フィールドは設けない)。
 - 満額(年額)は令和8年度(新規裁定者)の額をコード内に固定値として持つ。年度改定があってもAPIからは変更できない。
 
 ## エンドポイント
@@ -24,8 +25,8 @@ GET /api/pension/basic-pension
 | フィールド | 型 | 説明 |
 | --- | --- | --- |
 | `paidMonths` | integer | 計算に使用した保険料納付済月数 |
-| `annualAmountYen` | integer | 計算された年金額(年額、円) |
-| `monthlyAmountYen` | integer | 計算された年金額(月額、円) |
+| `annualAmountYen` | integer | 年金額(年額、円)。120ヶ月未満の場合は`0` |
+| `monthlyAmountYen` | integer | 年金額(月額、円)。120ヶ月未満の場合は`0` |
 
 #### 例: 満額(480ヶ月)
 
@@ -41,17 +42,31 @@ GET /api/pension/basic-pension?paidMonths=480
 }
 ```
 
-#### 例: 半額(240ヶ月)
+#### 例: 受給資格ぎりぎり(120ヶ月)
 
 ```
-GET /api/pension/basic-pension?paidMonths=240
+GET /api/pension/basic-pension?paidMonths=120
 ```
 
 ```json
 {
-  "paidMonths": 240,
-  "annualAmountYen": 423650,
-  "monthlyAmountYen": 35304
+  "paidMonths": 120,
+  "annualAmountYen": 211825,
+  "monthlyAmountYen": 17652
+}
+```
+
+#### 例: 受給資格未達(119ヶ月)
+
+```
+GET /api/pension/basic-pension?paidMonths=119
+```
+
+```json
+{
+  "paidMonths": 119,
+  "annualAmountYen": 0,
+  "monthlyAmountYen": 0
 }
 ```
 
