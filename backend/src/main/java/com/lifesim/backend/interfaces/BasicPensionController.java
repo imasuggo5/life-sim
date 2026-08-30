@@ -1,0 +1,50 @@
+package com.lifesim.backend.interfaces;
+
+import com.lifesim.backend.domain.BasicPensionCalculator;
+import com.lifesim.backend.domain.BasicPensionResult;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+/** 老齢基礎年金の計算結果を返すAPIを公開する。 */
+@RestController
+public class BasicPensionController {
+
+  private final BasicPensionCalculator calculator;
+
+  /**
+   * コントローラーを生成する。
+   *
+   * @param calculator 計算処理
+   */
+  public BasicPensionController(BasicPensionCalculator calculator) {
+    this.calculator = calculator;
+  }
+
+  /**
+   * 保険料納付済月数から老齢基礎年金額を計算する。
+   *
+   * @param paidMonths 保険料納付済月数(0〜480)
+   * @return 計算結果
+   */
+  @GetMapping("/api/pension/basic-pension")
+  public BasicPensionResult calculate(@RequestParam int paidMonths) {
+    return calculator.calculate(paidMonths);
+  }
+
+  /**
+   * 不正な入力を400エラーとして処理する。
+   *
+   * @param e 入力値検証の失敗
+   * @return エラー内容を表すレスポンスボディ
+   */
+  @ExceptionHandler(IllegalArgumentException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public Map<String, String> handleInvalidInput(IllegalArgumentException e) {
+    return Map.of("error", e.getMessage());
+  }
+}
