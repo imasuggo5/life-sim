@@ -55,11 +55,23 @@ function ChartTooltip({
 
   return (
     <div className="life-plan-simulator__tooltip">
-      <p>{label}歳</p>
-      <p>収入: {formatManYen(point.incomeManYen)}</p>
-      <p>支出: {formatManYen(point.expenseManYen)}</p>
-      <p>年間収支: {formatManYen(point.annualBalanceManYen)}</p>
-      <p>累積貯蓄額: {formatManYen(point.savingsManYen)}</p>
+      <p className="life-plan-simulator__tooltip-title">{label}歳</p>
+      <p className="life-plan-simulator__tooltip-row">
+        <span>収入</span>
+        <span>{formatManYen(point.incomeManYen)}</span>
+      </p>
+      <p className="life-plan-simulator__tooltip-row">
+        <span>支出</span>
+        <span>{formatManYen(point.expenseManYen)}</span>
+      </p>
+      <p className="life-plan-simulator__tooltip-row">
+        <span>年間収支</span>
+        <span>{formatManYen(point.annualBalanceManYen)}</span>
+      </p>
+      <p className="life-plan-simulator__tooltip-row">
+        <span>累積貯蓄額</span>
+        <span>{formatManYen(point.savingsManYen)}</span>
+      </p>
     </div>
   );
 }

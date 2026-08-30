@@ -56,3 +56,17 @@ body {
 .life-plan-simulator__tooltip p {
   margin: 0.15rem 0;
 }
+
+.life-plan-simulator__tooltip-title {
+  font-weight: bold;
+}
+
+.life-plan-simulator__tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.life-plan-simulator__tooltip-row span:last-child {
+  text-align: right;
+}
