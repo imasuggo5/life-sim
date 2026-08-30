@@ -11,14 +11,18 @@
 
 ## 入力項目(左パネル)
 
-| 項目                 | フィールド名           | 型      | 制約                 |
-| -------------------- | ---------------------- | ------- | -------------------- |
-| 現在年齢             | `currentAge`           | integer | 0〜120               |
-| 現在の貯蓄額         | `currentSavingsManYen` | integer | 0以上(単位: 万円)    |
-| 平均年収(年間、額面) | `annualIncomeManYen`   | integer | 0以上(単位: 万円)    |
-| 支出(年間)           | `annualExpenseManYen`  | integer | 0以上(単位: 万円)    |
-| 保険料納付済月数     | `paidMonths`           | integer | 0〜480               |
-| 受給開始年齢         | `claimAgeYears`        | integer | 60〜75(デフォルト65) |
+| 項目                 | フィールド名             | 型      | 制約                 |
+| -------------------- | ------------------------ | ------- | -------------------- |
+| 現在年齢             | `currentAge`             | integer | 0〜120               |
+| 現在の貯蓄額         | `currentSavingsManYen`   | integer | 0以上(単位: 万円)    |
+| 平均年収(年間、額面) | `annualIncomeManYen`     | integer | 0以上(単位: 万円)    |
+| 生活費(年間)         | `livingExpenseManYen`    | integer | 0以上(単位: 万円)    |
+| 住宅費(年間)         | `housingExpenseManYen`   | integer | 0以上(単位: 万円)    |
+| 保険料(年間)         | `insurancePremiumManYen` | integer | 0以上(単位: 万円)    |
+| 保険料納付済月数     | `paidMonths`             | integer | 0〜480               |
+| 受給開始年齢         | `claimAgeYears`          | integer | 60〜75(デフォルト65) |
+
+支出は「生活費」「住宅費」「保険料」の3項目に分けて入力し、合計を年間支出として扱う。
 
 ボタン: 「シミュレーション」
 
@@ -27,7 +31,7 @@
 ## 計算方法
 
 1. `POST /api/pension/basic-pension` を1回呼び出し、`pensionAmount.annualAmountYen`(年金の年額、円)を取得する。
-2. 入力(万円)を円に変換する: `annualIncomeYen = annualIncomeManYen × 10,000`、`annualExpenseYen = annualExpenseManYen × 10,000`、`currentSavingsYen = currentSavingsManYen × 10,000`。
+2. 入力(万円)を円に変換する: `annualIncomeYen = annualIncomeManYen × 10,000`、`currentSavingsYen = currentSavingsManYen × 10,000`、`annualExpenseYen = (livingExpenseManYen + housingExpenseManYen + insurancePremiumManYen) × 10,000`。
 3. 年齢`currentAge`〜`100`について、累積貯蓄額(円)を計算する:
    - `cumulative[currentAge] = currentSavingsYen`
    - 各年齢について、`age < claimAgeYears`なら収入=`annualIncomeYen`、`age >= claimAgeYears`なら収入=年金の年額

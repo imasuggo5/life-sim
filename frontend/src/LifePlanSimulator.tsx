@@ -37,8 +37,12 @@ function LifePlanSimulator() {
     useState<NumberInput>(0);
   const [annualIncomeManYen, setAnnualIncomeManYen] =
     useState<NumberInput>(400);
-  const [annualExpenseManYen, setAnnualExpenseManYen] =
-    useState<NumberInput>(300);
+  const [livingExpenseManYen, setLivingExpenseManYen] =
+    useState<NumberInput>(180);
+  const [housingExpenseManYen, setHousingExpenseManYen] =
+    useState<NumberInput>(100);
+  const [insurancePremiumManYen, setInsurancePremiumManYen] =
+    useState<NumberInput>(20);
   const [paidMonths, setPaidMonths] = useState<NumberInput>(480);
   const [claimAgeYears, setClaimAgeYears] = useState<NumberInput>(
     DEFAULT_CLAIM_AGE_YEARS,
@@ -54,7 +58,9 @@ function LifePlanSimulator() {
       currentAge === "" ||
       currentSavingsManYen === "" ||
       annualIncomeManYen === "" ||
-      annualExpenseManYen === "" ||
+      livingExpenseManYen === "" ||
+      housingExpenseManYen === "" ||
+      insurancePremiumManYen === "" ||
       paidMonths === "" ||
       claimAgeYears === ""
     ) {
@@ -87,7 +93,9 @@ function LifePlanSimulator() {
 
       // 誤差が蓄積しないよう、内部の計算は円単位のまま行う。
       const annualIncomeYen = annualIncomeManYen * YEN_PER_MAN_YEN;
-      const annualExpenseYen = annualExpenseManYen * YEN_PER_MAN_YEN;
+      const annualExpenseYen =
+        (livingExpenseManYen + housingExpenseManYen + insurancePremiumManYen) *
+        YEN_PER_MAN_YEN;
 
       const points: ChartPoint[] = [];
       let savingsYen = currentSavingsManYen * YEN_PER_MAN_YEN;
@@ -158,15 +166,43 @@ function LifePlanSimulator() {
               />
             </div>
             <div>
-              <label htmlFor="annualExpenseManYen">支出(年間、万円)</label>
+              <label htmlFor="livingExpenseManYen">生活費(年間、万円)</label>
               <input
-                id="annualExpenseManYen"
+                id="livingExpenseManYen"
                 type="number"
                 min={0}
-                value={annualExpenseManYen}
+                value={livingExpenseManYen}
                 onChange={(e) => {
                   const value = e.target.value;
-                  setAnnualExpenseManYen(value === "" ? "" : Number(value));
+                  setLivingExpenseManYen(value === "" ? "" : Number(value));
+                }}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="housingExpenseManYen">住宅費(年間、万円)</label>
+              <input
+                id="housingExpenseManYen"
+                type="number"
+                min={0}
+                value={housingExpenseManYen}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setHousingExpenseManYen(value === "" ? "" : Number(value));
+                }}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="insurancePremiumManYen">保険料(年間、万円)</label>
+              <input
+                id="insurancePremiumManYen"
+                type="number"
+                min={0}
+                value={insurancePremiumManYen}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setInsurancePremiumManYen(value === "" ? "" : Number(value));
                 }}
                 required
               />
