@@ -6,3 +6,67 @@ body {
   margin: 0;
   font-family: system-ui, sans-serif;
 }
+
+.life-plan-simulator__panels {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.life-plan-simulator__panel-left {
+  flex: 0 0 auto;
+}
+
+.life-plan-simulator__panel-right {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.life-plan-simulator__panel-left fieldset {
+  margin-bottom: 1rem;
+}
+
+.life-plan-simulator__panel-left .form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.life-plan-simulator__panel-left .form-row label {
+  flex: 0 0 12rem;
+}
+
+.life-plan-simulator__panel-left .form-row input {
+  flex: 1 1 auto;
+}
+
+.life-plan-simulator__panel-left .form-row .unit {
+  flex: 0 0 auto;
+  margin-left: 0.5rem;
+}
+
+.life-plan-simulator__tooltip {
+  background: canvas;
+  color: canvastext;
+  border: 1px solid #999;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+}
+
+.life-plan-simulator__tooltip p {
+  margin: 0.15rem 0;
+}
+
+.life-plan-simulator__tooltip-title {
+  font-weight: bold;
+}
+
+.life-plan-simulator__tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.life-plan-simulator__tooltip-row span:last-child {
+  text-align: right;
+}
