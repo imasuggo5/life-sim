@@ -57,7 +57,7 @@ body {
 }
 
 .decade-row select {
-  flex: 0 0 9rem;
+  flex: 0 0 11rem;
   min-width: 0;
 }
 

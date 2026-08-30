@@ -138,6 +138,60 @@ function ChartTooltip({
   );
 }
 
+interface NumberFieldProps {
+  id: string;
+  label: string;
+  unit: string;
+  value: NumberInput;
+  onChange: (value: NumberInput) => void;
+  min?: number;
+  max?: number;
+}
+
+/** ラベル+数値入力+単位を1行で並べる共通の入力部品。標準の`.form-row`レイアウトを使う。 */
+function NumberField({
+  id,
+  label,
+  unit,
+  value,
+  onChange,
+  min,
+  max,
+}: NumberFieldProps) {
+  return (
+    <div className="form-row">
+      <label htmlFor={id}>{label}</label>
+      <input
+        id={id}
+        type="number"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => {
+          const v = e.target.value;
+          onChange(v === "" ? "" : Number(v));
+        }}
+        required
+      />
+      <span className="unit">{unit}</span>
+    </div>
+  );
+}
+
+type UnitFieldProps = Omit<NumberFieldProps, "unit">;
+
+function ManYenField(props: UnitFieldProps) {
+  return <NumberField {...props} unit="万円" />;
+}
+
+function AgeField(props: UnitFieldProps) {
+  return <NumberField {...props} unit="歳" />;
+}
+
+function MonthsField(props: UnitFieldProps) {
+  return <NumberField {...props} unit="カ月" />;
+}
+
 function LifePlanSimulator() {
   const [currentAge, setCurrentAge] = useState<NumberInput>(40);
   const [currentSavingsManYen, setCurrentSavingsManYen] =
@@ -268,22 +322,14 @@ function LifePlanSimulator() {
           <form onSubmit={handleSubmit}>
             <fieldset>
               <legend>基本情報</legend>
-              <div className="form-row">
-                <label htmlFor="currentAge">現在年齢</label>
-                <input
-                  id="currentAge"
-                  type="number"
-                  min={0}
-                  max={120}
-                  value={currentAge}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setCurrentAge(value === "" ? "" : Number(value));
-                  }}
-                  required
-                />
-                <span className="unit">歳</span>
-              </div>
+              <AgeField
+                id="currentAge"
+                label="現在年齢"
+                min={0}
+                max={120}
+                value={currentAge}
+                onChange={setCurrentAge}
+              />
             </fieldset>
 
             <fieldset>
@@ -321,138 +367,70 @@ function LifePlanSimulator() {
                   <span className="unit">万円</span>
                 </div>
               ))}
-              <div className="form-row">
-                <label htmlFor="retirementAge">退職年齢</label>
-                <input
-                  id="retirementAge"
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={retirementAge}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setRetirementAge(value === "" ? "" : Number(value));
-                  }}
-                  required
-                />
-                <span className="unit">歳</span>
-              </div>
+              <AgeField
+                id="retirementAge"
+                label="退職年齢"
+                min={0}
+                max={100}
+                value={retirementAge}
+                onChange={setRetirementAge}
+              />
             </fieldset>
 
             <fieldset>
               <legend>収支</legend>
-              <div className="form-row">
-                <label htmlFor="livingExpenseManYenPerMonth">
-                  生活費(月額)
-                </label>
-                <input
-                  id="livingExpenseManYenPerMonth"
-                  type="number"
-                  min={0}
-                  value={livingExpenseManYenPerMonth}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setLivingExpenseManYenPerMonth(
-                      value === "" ? "" : Number(value),
-                    );
-                  }}
-                  required
-                />
-                <span className="unit">万円</span>
-              </div>
-              <div className="form-row">
-                <label htmlFor="housingExpenseManYenPerMonth">
-                  住宅費(月額)
-                </label>
-                <input
-                  id="housingExpenseManYenPerMonth"
-                  type="number"
-                  min={0}
-                  value={housingExpenseManYenPerMonth}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setHousingExpenseManYenPerMonth(
-                      value === "" ? "" : Number(value),
-                    );
-                  }}
-                  required
-                />
-                <span className="unit">万円</span>
-              </div>
-              <div className="form-row">
-                <label htmlFor="insurancePremiumManYenPerMonth">
-                  保険料(月額)
-                </label>
-                <input
-                  id="insurancePremiumManYenPerMonth"
-                  type="number"
-                  min={0}
-                  value={insurancePremiumManYenPerMonth}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setInsurancePremiumManYenPerMonth(
-                      value === "" ? "" : Number(value),
-                    );
-                  }}
-                  required
-                />
-                <span className="unit">万円</span>
-              </div>
+              <ManYenField
+                id="livingExpenseManYenPerMonth"
+                label="生活費(月額)"
+                min={0}
+                value={livingExpenseManYenPerMonth}
+                onChange={setLivingExpenseManYenPerMonth}
+              />
+              <ManYenField
+                id="housingExpenseManYenPerMonth"
+                label="住宅費(月額)"
+                min={0}
+                value={housingExpenseManYenPerMonth}
+                onChange={setHousingExpenseManYenPerMonth}
+              />
+              <ManYenField
+                id="insurancePremiumManYenPerMonth"
+                label="保険料(月額)"
+                min={0}
+                value={insurancePremiumManYenPerMonth}
+                onChange={setInsurancePremiumManYenPerMonth}
+              />
             </fieldset>
 
             <fieldset>
               <legend>資産</legend>
-              <div className="form-row">
-                <label htmlFor="currentSavingsManYen">現在の貯蓄額</label>
-                <input
-                  id="currentSavingsManYen"
-                  type="number"
-                  min={0}
-                  value={currentSavingsManYen}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setCurrentSavingsManYen(value === "" ? "" : Number(value));
-                  }}
-                  required
-                />
-                <span className="unit">万円</span>
-              </div>
+              <ManYenField
+                id="currentSavingsManYen"
+                label="現在の貯蓄額"
+                min={0}
+                value={currentSavingsManYen}
+                onChange={setCurrentSavingsManYen}
+              />
             </fieldset>
 
             <fieldset>
               <legend>年金</legend>
-              <div className="form-row">
-                <label htmlFor="paidMonths">保険料納付済月数</label>
-                <input
-                  id="paidMonths"
-                  type="number"
-                  min={0}
-                  max={480}
-                  value={paidMonths}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setPaidMonths(value === "" ? "" : Number(value));
-                  }}
-                  required
-                />
-                <span className="unit">ヶ月</span>
-              </div>
-              <div className="form-row">
-                <label htmlFor="claimAgeYears">受給開始年齢</label>
-                <input
-                  id="claimAgeYears"
-                  type="number"
-                  min={60}
-                  max={75}
-                  value={claimAgeYears}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setClaimAgeYears(value === "" ? "" : Number(value));
-                  }}
-                  required
-                />
-                <span className="unit">歳</span>
-              </div>
+              <MonthsField
+                id="paidMonths"
+                label="保険料納付済月数"
+                min={0}
+                max={480}
+                value={paidMonths}
+                onChange={setPaidMonths}
+              />
+              <AgeField
+                id="claimAgeYears"
+                label="受給開始年齢"
+                min={60}
+                max={75}
+                value={claimAgeYears}
+                onChange={setClaimAgeYears}
+              />
             </fieldset>
 
             <button type="submit" disabled={isLoading}>
