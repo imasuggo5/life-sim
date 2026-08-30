@@ -36,7 +36,7 @@ interface ChartPoint {
 type NumberInput = number | "";
 
 function formatManYen(value: number): string {
-  return `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })}万円`;
+  return `${Math.round(value).toLocaleString()}万円`;
 }
 
 function ChartTooltip({
