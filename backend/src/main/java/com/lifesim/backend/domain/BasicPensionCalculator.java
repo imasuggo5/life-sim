@@ -2,12 +2,17 @@ package com.lifesim.backend.domain;
 
 import org.springframework.stereotype.Component;
 
-/** 老齢基礎年金を簡易計算式(満額 × 保険料納付済月数 ÷ 480ヶ月)で算出する。免除期間は考慮せず、保険料納付済月数のみを扱う。受給資格期間(120ヶ月)未満の場合は年金額を0とする。 */
+/**
+ * 老齢基礎年金を簡易計算式(満額 × 保険料納付済月数 ÷ 480ヶ月)で算出する。免除期間は考慮せず、保険料納付済月数のみを扱う。受給資格期間(120ヶ月)未満の場合は年金額を0とする。
+ *
+ * <p>制度基準日: 令和8年度(2026年度)の制度内容(満額・受給資格期間)を基に実装。2026-08-30時点でnenkin.go.jpの情報を確認済み。
+ * 制度改正・年度改定があった場合は、このクラスの定数を更新すること。
+ */
 @Component
 public class BasicPensionCalculator {
 
   /**
-   * 令和8年度(新規裁定者)の満額(年額、円)。毎年度改定される。 参照:
+   * 令和8年度(新規裁定者)の満額(年額、円)。毎年度改定される。確認日: 2026-08-30。 参照:
    * https://www.nenkin.go.jp/oshirase/taisetu/kojin/2026/202604/0401.html
    */
   static final long FULL_ANNUAL_AMOUNT_YEN = 847_300;
