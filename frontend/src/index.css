@@ -40,6 +40,10 @@ body {
   flex: 0 0 6rem;
 }
 
+.life-plan-simulator__panel-left .form-row--man-yen input {
+  flex-basis: 4.5rem;
+}
+
 .life-plan-simulator__panel-left .form-row .unit {
   flex: 0 0 auto;
   margin-left: 0.5rem;
