@@ -98,7 +98,7 @@ interface ChartPoint {
   incomeManYen: number;
   expenseManYen: number;
   annualBalanceManYen: number;
-  assetGrowthManYen: number;
+  assetTotalManYen: number;
 }
 
 interface AssetRecord {
@@ -160,8 +160,8 @@ function ChartTooltip({
         <span>{formatManYen(point.annualBalanceManYen)}</span>
       </p>
       <p className="life-plan-simulator__tooltip-row">
-        <span>資産による増加額</span>
-        <span>{formatManYen(point.assetGrowthManYen)}</span>
+        <span>資産額</span>
+        <span>{formatManYen(point.assetTotalManYen)}</span>
       </p>
       <p className="life-plan-simulator__tooltip-row">
         <span>累積貯蓄額</span>
@@ -401,29 +401,25 @@ function LifePlanSimulator() {
             : age >= claimAgeYears
               ? pensionAnnualAmountYen
               : 0) + (age === retirementAge ? retirementBonusYen : 0);
-        let assetGrowthYen = 0;
         if (age > currentAge) {
-          const grownBalancesYen = assetBalancesYen.map(
+          assetBalancesYen = assetBalancesYen.map(
             (balance, i) =>
               balance *
               (1 + (assetRecords[i].annualRatePercent as number) / 100),
           );
-          assetGrowthYen = grownBalancesYen.reduce(
-            (sum, balance, i) => sum + (balance - assetBalancesYen[i]),
-            0,
-          );
-          assetBalancesYen = grownBalancesYen;
           cashBufferYen += incomeYen - annualExpenseYen;
         }
-        const savingsYen =
-          assetBalancesYen.reduce((sum, balance) => sum + balance, 0) +
-          cashBufferYen;
+        // 累積貯蓄額には資産を含めない(資産は「資産額」として別枠で表示する)。
+        const assetTotalYen = assetBalancesYen.reduce(
+          (sum, balance) => sum + balance,
+          0,
+        );
         points.push({
           age,
-          savingsManYen: savingsYen / YEN_PER_MAN_YEN,
+          savingsManYen: cashBufferYen / YEN_PER_MAN_YEN,
+          assetTotalManYen: assetTotalYen / YEN_PER_MAN_YEN,
           incomeManYen: incomeYen / YEN_PER_MAN_YEN,
           expenseManYen: annualExpenseYen / YEN_PER_MAN_YEN,
-          assetGrowthManYen: assetGrowthYen / YEN_PER_MAN_YEN,
           annualBalanceManYen: (incomeYen - annualExpenseYen) / YEN_PER_MAN_YEN,
         });
       }
