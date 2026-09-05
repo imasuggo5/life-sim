@@ -200,6 +200,8 @@ function LifePlanSimulator() {
     INITIAL_DECADE_INCOMES,
   );
   const [retirementAge, setRetirementAge] = useState<NumberInput>(65);
+  const [retirementBonusManYen, setRetirementBonusManYen] =
+    useState<NumberInput>(2000);
   const [livingExpenseManYenPerMonth, setLivingExpenseManYenPerMonth] =
     useState<NumberInput>(17);
   const [housingExpenseManYenPerMonth, setHousingExpenseManYenPerMonth] =
@@ -237,6 +239,7 @@ function LifePlanSimulator() {
       currentSavingsManYen === "" ||
       decadeIncomes.some((d) => d.incomeManYen === "") ||
       retirementAge === "" ||
+      retirementBonusManYen === "" ||
       livingExpenseManYenPerMonth === "" ||
       housingExpenseManYenPerMonth === "" ||
       insurancePremiumManYenPerMonth === "" ||
@@ -282,18 +285,21 @@ function LifePlanSimulator() {
         MONTHS_PER_YEAR *
         YEN_PER_MAN_YEN;
 
+      const retirementBonusYen = retirementBonusManYen * YEN_PER_MAN_YEN;
+
       const points: ChartPoint[] = [];
       let savingsYen = currentSavingsManYen * YEN_PER_MAN_YEN;
       for (let age = currentAge; age <= SIMULATION_END_AGE; age++) {
         // 退職年齢までは年代別の年収、退職後は年金開始年齢に達するまで収入0円、
         // 年金開始年齢以降は年金額とする(退職と年金受給の重複は考慮しない)。
+        // 退職金は退職年齢の年に一時金として一度だけ収入に上乗せする。
         const incomeYen =
-          age < retirementAge
+          (age < retirementAge
             ? getIncomeManYenForAge(age, resolvedDecadeIncomes) *
               YEN_PER_MAN_YEN
             : age >= claimAgeYears
               ? pensionAnnualAmountYen
-              : 0;
+              : 0) + (age === retirementAge ? retirementBonusYen : 0);
         if (age > currentAge) {
           savingsYen += incomeYen - annualExpenseYen;
         }
@@ -374,6 +380,13 @@ function LifePlanSimulator() {
                 max={100}
                 value={retirementAge}
                 onChange={setRetirementAge}
+              />
+              <ManYenField
+                id="retirementBonusManYen"
+                label="退職金"
+                min={0}
+                value={retirementBonusManYen}
+                onChange={setRetirementBonusManYen}
               />
             </fieldset>
 
