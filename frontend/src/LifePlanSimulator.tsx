@@ -71,8 +71,25 @@ interface BasicPensionResponse {
   };
 }
 
+interface EmployeePensionResponse {
+  eligibility: {
+    enrolledMonths: number;
+    averageStandardRemunerationManYen: number;
+  };
+  pensionAmount: {
+    annualAmountYen: number;
+  };
+}
+
 interface ErrorResponse {
   error: string;
+}
+
+interface PensionSummary {
+  basicAnnualManYen: number;
+  employeeAnnualManYen: number;
+  enrolledMonths: number;
+  averageStandardRemunerationManYen: number;
 }
 
 interface ChartPoint {
@@ -214,6 +231,9 @@ function LifePlanSimulator() {
   );
 
   const [chartData, setChartData] = useState<ChartPoint[] | null>(null);
+  const [pensionSummary, setPensionSummary] = useState<PensionSummary | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -252,32 +272,60 @@ function LifePlanSimulator() {
     setIsLoading(true);
     setError(null);
     setChartData(null);
+    setPensionSummary(null);
 
     try {
-      const res = await fetch("/api/pension/basic-pension", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          eligibilityPeriod: { paidMonths },
-          claimAge: { years: claimAgeYears },
-        }),
-      });
-
-      const data: BasicPensionResponse | ErrorResponse = await res.json();
-
-      if (!res.ok) {
-        setError("error" in data ? data.error : "計算に失敗しました");
-        return;
-      }
-
-      const pensionAnnualAmountYen = (data as BasicPensionResponse)
-        .pensionAmount.annualAmountYen;
-
-      // 誤差が蓄積しないよう、内部の計算は円単位のまま行う。
       const resolvedDecadeIncomes = decadeIncomes.map((d) => ({
         decadeStartAge: d.decadeStartAge,
         incomeManYen: d.incomeManYen as number,
+        workStyle: d.workStyle,
       }));
+
+      const [basicRes, employeeRes] = await Promise.all([
+        fetch("/api/pension/basic-pension", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            eligibilityPeriod: { paidMonths },
+            claimAge: { years: claimAgeYears },
+          }),
+        }),
+        fetch("/api/pension/employee-pension", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            decadeIncomes: resolvedDecadeIncomes,
+            retirementAge,
+            claimAge: { years: claimAgeYears },
+          }),
+        }),
+      ]);
+
+      const basicData: BasicPensionResponse | ErrorResponse =
+        await basicRes.json();
+      const employeeData: EmployeePensionResponse | ErrorResponse =
+        await employeeRes.json();
+
+      if (!basicRes.ok) {
+        setError("error" in basicData ? basicData.error : "計算に失敗しました");
+        return;
+      }
+      if (!employeeRes.ok) {
+        setError(
+          "error" in employeeData ? employeeData.error : "計算に失敗しました",
+        );
+        return;
+      }
+
+      const basicAnnualAmountYen = (basicData as BasicPensionResponse)
+        .pensionAmount.annualAmountYen;
+      const employeeAnnualAmountYen = (employeeData as EmployeePensionResponse)
+        .pensionAmount.annualAmountYen;
+      const pensionAnnualAmountYen =
+        basicAnnualAmountYen + employeeAnnualAmountYen;
+      const eligibility = (employeeData as EmployeePensionResponse).eligibility;
+
+      // 誤差が蓄積しないよう、内部の計算は円単位のまま行う。
       const annualExpenseYen =
         (livingExpenseManYenPerMonth +
           housingExpenseManYenPerMonth +
@@ -313,6 +361,13 @@ function LifePlanSimulator() {
       }
 
       setChartData(points);
+      setPensionSummary({
+        basicAnnualManYen: basicAnnualAmountYen / YEN_PER_MAN_YEN,
+        employeeAnnualManYen: employeeAnnualAmountYen / YEN_PER_MAN_YEN,
+        enrolledMonths: eligibility.enrolledMonths,
+        averageStandardRemunerationManYen:
+          eligibility.averageStandardRemunerationManYen,
+      });
     } catch {
       setError("通信に失敗しました");
     } finally {
@@ -455,6 +510,23 @@ function LifePlanSimulator() {
         </div>
 
         <div className="life-plan-simulator__panel-right">
+          {pensionSummary && (
+            <p className="life-plan-simulator__pension-summary">
+              年金試算: 老齢基礎年金{" "}
+              {formatManYen(pensionSummary.basicAnnualManYen)}/年 + 老齢厚生年金{" "}
+              {formatManYen(pensionSummary.employeeAnnualManYen)}/年 = 合計{" "}
+              {formatManYen(
+                pensionSummary.basicAnnualManYen +
+                  pensionSummary.employeeAnnualManYen,
+              )}
+              /年
+              <br />
+              (厚生年金加入月数: {pensionSummary.enrolledMonths}
+              ヶ月、平均標準報酬額:{" "}
+              {formatManYen(pensionSummary.averageStandardRemunerationManYen)}
+              /月)
+            </p>
+          )}
           {chartData && (
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={chartData}>
