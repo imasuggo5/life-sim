@@ -110,7 +110,7 @@ interface AssetRecord {
 }
 
 const INITIAL_ASSET_RECORDS: AssetRecord[] = [
-  { id: "asset-1", name: "現金", amountManYen: 1200, annualRatePercent: 0 },
+  { id: "asset-1", name: "資産1", amountManYen: 1200, annualRatePercent: 0 },
 ];
 
 function formatManYen(value: number): string {
