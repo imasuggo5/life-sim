@@ -99,6 +99,7 @@ interface ChartPoint {
   expenseManYen: number;
   annualBalanceManYen: number;
   assetTotalManYen: number;
+  totalManYen: number;
 }
 
 interface AssetRecord {
@@ -164,7 +165,7 @@ function ChartTooltip({
         <span>{formatManYen(point.assetTotalManYen)}</span>
       </p>
       <p className="life-plan-simulator__tooltip-row">
-        <span>累積貯蓄額</span>
+        <span>貯金額</span>
         <span>{formatManYen(point.savingsManYen)}</span>
       </p>
     </div>
@@ -409,15 +410,19 @@ function LifePlanSimulator() {
           );
           cashBufferYen += incomeYen - annualExpenseYen;
         }
-        // 累積貯蓄額には資産を含めない(資産は「資産額」として別枠で表示する)。
+        // 貯金額(現金バッファ)には資産を含めない(資産は「資産額」として別枠で表示する)。
+        // グラフの縦軸は貯金額+資産額の合計を表示する。
         const assetTotalYen = assetBalancesYen.reduce(
           (sum, balance) => sum + balance,
           0,
         );
+        const savingsManYen = cashBufferYen / YEN_PER_MAN_YEN;
+        const assetTotalManYen = assetTotalYen / YEN_PER_MAN_YEN;
         points.push({
           age,
-          savingsManYen: cashBufferYen / YEN_PER_MAN_YEN,
-          assetTotalManYen: assetTotalYen / YEN_PER_MAN_YEN,
+          savingsManYen,
+          assetTotalManYen,
+          totalManYen: savingsManYen + assetTotalManYen,
           incomeManYen: incomeYen / YEN_PER_MAN_YEN,
           expenseManYen: annualExpenseYen / YEN_PER_MAN_YEN,
           annualBalanceManYen: (incomeYen - annualExpenseYen) / YEN_PER_MAN_YEN,
@@ -683,7 +688,7 @@ function LifePlanSimulator() {
                 />
                 <Line
                   type="monotone"
-                  dataKey="savingsManYen"
+                  dataKey="totalManYen"
                   stroke="#3366cc"
                   dot={false}
                 />
