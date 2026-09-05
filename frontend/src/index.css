@@ -71,6 +71,27 @@ body {
   flex: 0 0 auto;
 }
 
+.asset-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.asset-row input[type="text"] {
+  flex: 1 1 auto;
+  min-width: 6rem;
+}
+
+.asset-row input[type="number"] {
+  flex: 0 0 5rem;
+  min-width: 0;
+}
+
+.asset-row .unit {
+  flex: 0 0 auto;
+}
+
 .life-plan-simulator__tooltip {
   background: canvas;
   color: canvastext;

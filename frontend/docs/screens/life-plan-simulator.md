@@ -24,7 +24,7 @@
 | 収支       | 生活費(月額)     | `livingExpenseManYenPerMonth`    | integer | 万円         | 0以上                |
 | 収支       | 住宅費(月額)     | `housingExpenseManYenPerMonth`   | integer | 万円         | 0以上                |
 | 収支       | 保険料(月額)     | `insurancePremiumManYenPerMonth` | integer | 万円         | 0以上                |
-| 資産       | 現在の貯蓄額     | `currentSavingsManYen`           | integer | 万円         | 0以上                |
+| 資産       | (下表参照)       | -                                | -       | -            | -                    |
 
 支出は「生活費」「住宅費」「保険料」の3項目に月額で入力し、12倍した合計を年間支出として扱う。
 
@@ -50,6 +50,13 @@
 - 退職年齢`retirementAge`(歳、0〜100、デフォルト65)は収入セクションに残す(標準の行レイアウト)。
 - 退職金`retirementBonusManYen`(万円、0以上、デフォルト2000)を退職年齢の下に追加する。退職年齢の年に一時金として一度だけ収入に上乗せする。
 
+### 資産セクションの詳細
+
+「現在の貯蓄額」(単一の値)を廃止し、資産をレコード形式で複数登録できるようにする。各レコードは`{ name(名前), amountManYen(金額、万円), annualRatePercent(年利、%) }`を持つ。行の追加・削除が自由にできる(初期状態は1行: 名前=「現金」、金額=1200万円、年利=0%)。
+
+- 各行は1行で「名前(テキスト入力)」「金額入力+単位(万円)」「年利入力+単位(%)」「削除ボタン」を横に並べる(年代別収入の行と同様、コンパクトな専用レイアウト)。名前は自由入力(必須)、金額は0以上、年利は正負どちらも入力可能(制約なし)。
+- リストの下に「資産を追加」ボタンを置き、押すと新しい空の行(名前は空、金額0、年利0)を末尾に追加する。
+
 ボタン: 「シミュレーション」
 
 金額系の入力・グラフ表示はすべて万円単位とする(内部の計算は誤差蓄積を避けるため円単位で行い、表示直前に万円へ変換する)。
@@ -61,21 +68,26 @@
    - `employee-pension`: `decadeIncomes`(既存の年代別年収・働き方をそのまま渡す)・`retirementAge`・`claimAge.years`
    - 年金の年額 = 両APIの`pensionAmount.annualAmountYen`の合計(円)
 2. 入力(万円)を円に変換する:
-   - `currentSavingsYen = currentSavingsManYen × 10,000`
    - `annualExpenseYen = (livingExpenseManYenPerMonth + housingExpenseManYenPerMonth + insurancePremiumManYenPerMonth) × 12 × 10,000`
+   - 各資産レコードの`amountManYen`を円に変換し、資産ごとの残高の初期値とする
 3. 年齢から年代別の年収(万円)を求める関数を用意する:
    - `age < 30`: `incomeManYen20s`
    - `30 <= age < 40`: `incomeManYen30s`
    - `40 <= age < 50`: `incomeManYen40s`
    - `50 <= age < 60`: `incomeManYen50s`
    - `age >= 60`: `incomeManYen60s`(60代以降はすべてこの値を使う簡易化。現在年齢が20歳未満の場合も20代の年収を使う)
-4. 年齢`currentAge`〜`100`について、累積貯蓄額(円)を計算する:
-   - `cumulative[currentAge] = currentSavingsYen`
+4. 年齢`currentAge`〜`100`について、累積貯蓄額(円)を計算する。各資産は自身の年利で複利成長させ、毎年の収支(収入−支出)は資産の運用とは別に「現金バッファ」として利率なしで積み上げる:
+   - `assetBalance_i[currentAge] = amountManYen_i × 10,000`(資産ごとの初期残高)
+   - `cashBuffer[currentAge] = 0`
    - 各年齢の収入は次のいずれか(退職と年金受給の重複は考慮しない簡易計算)に、`age === retirementAge`の場合のみ退職金(`retirementBonusManYen`、円に変換)を加算する:
      - `age < retirementAge`: その年齢の年代別年収(手順3、円に変換)(在職中)
      - `retirementAge <= age かつ age < claimAgeYears`: `0`(退職済みだが年金受給前)
      - `age >= claimAgeYears`: 年金の年額(受給開始後)
-   - `cumulative[age] = cumulative[age - 1] + 収入 - annualExpenseYen`
+   - `age > currentAge`の場合:
+     - `assetBalance_i[age] = assetBalance_i[age - 1] × (1 + annualRatePercent_i / 100)`(資産ごとに複利成長)
+     - `cashBuffer[age] = cashBuffer[age - 1] + 収入 - annualExpenseYen`
+   - `cumulative[age] = Σ assetBalance_i[age] + cashBuffer[age]`
+   - 全資産の年利が0%の場合、この計算はこれまでの「単純合計」と完全に一致する。
 5. 表示直前に万円へ変換(`÷ 10,000`)し、横軸=年齢、縦軸=累積貯蓄額(万円)の折れ線グラフとして表示する。グラフには0万円のラインを強調表示する(赤色の基準線)。
 6. グラフ上の各点をホバーした際のツールチップに、その年齢の「収入」「支出」「年間収支(収入−支出)」「累積貯蓄額」をあわせて表示する。
 7. グラフの上(ボタンとグラフの間)に、年金の内訳を1行のテキストで表示する:
@@ -89,7 +101,7 @@
 
 - シミュレーション終了年齢は100歳固定。
 - 年収は年代別(10年単位)で入力し、同一年代内は一定と仮定する(インフレ・支出変化は考慮しない)。支出は生涯一定と仮定する。
-- 老齢基礎年金・老齢厚生年金以外の収入(貯蓄の運用益等)は考慮しない。
+- 老齢基礎年金・老齢厚生年金、資産の年利による運用益以外の収入は考慮しない。
 - 額面ベースの簡易計算(税・社会保険料控除は考慮しない)。
 
 ## 使用ライブラリ
