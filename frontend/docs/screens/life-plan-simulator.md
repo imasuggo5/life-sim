@@ -89,7 +89,8 @@
    - `age > currentAge`の場合:
      - `assetBalance_i[age] = assetBalance_i[age - 1] × (1 + annualRatePercent_i / 100)`(資産ごとに複利成長)
      - `cashBuffer[age] = cashBuffer[age - 1] + 収入 - annualExpenseYen`
-   - `assetTotal[age] = Σ assetBalance_i[age]`(資産額。資産の複利成長分のみを反映し、貯金額には含めない)
+     - `cashBuffer[age] < 0`の場合、不足額(`-cashBuffer[age]`)をリストの先頭の資産から順に取り崩して埋め合わせる(資産の種別・流動性は区別しない。1つの資産の残高で足りなければ次の資産へ)。全資産を使い切ってもなお不足する場合、`cashBuffer[age]`はマイナスのまま(資金繰り破綻の状態)。
+   - `assetTotal[age] = Σ assetBalance_i[age]`(資産額。取り崩し後の残高の合計)
    - `savings[age] = cashBuffer[age]`(貯金額は現金バッファのみで、資産額は含めない)
    - `total[age] = savings[age] + assetTotal[age]`(貯金額+資産額の合計。グラフの縦軸として使う)
 5. 表示直前に万円へ変換(`÷ 10,000`)し、横軸=年齢、縦軸=`total`(貯金額+資産額、万円)の折れ線グラフとして表示する。グラフには0万円のラインを強調表示する(赤色の基準線)。

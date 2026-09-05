@@ -409,6 +409,21 @@ function LifePlanSimulator() {
               (1 + (assetRecords[i].annualRatePercent as number) / 100),
           );
           cashBufferYen += incomeYen - annualExpenseYen;
+
+          // 貯金額がマイナスになった場合、不足額をリストの先頭の資産から順に
+          // 取り崩して埋め合わせる(取り崩す資産の種別は区別しない)。
+          if (cashBufferYen < 0) {
+            let shortfallYen = -cashBufferYen;
+            assetBalancesYen = assetBalancesYen.map((balance) => {
+              if (shortfallYen <= 0) {
+                return balance;
+              }
+              const drawYen = Math.min(balance, shortfallYen);
+              shortfallYen -= drawYen;
+              return balance - drawYen;
+            });
+            cashBufferYen = -shortfallYen;
+          }
         }
         // 貯金額(現金バッファ)には資産を含めない(資産は「資産額」として別枠で表示する)。
         // グラフの縦軸は貯金額+資産額の合計を表示する。
