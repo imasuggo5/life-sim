@@ -71,6 +71,51 @@ body {
   flex: 0 0 auto;
 }
 
+.asset-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.asset-row input,
+.asset-row button {
+  box-sizing: border-box;
+}
+
+.asset-row__number {
+  flex: 0 0 1.2rem;
+}
+
+.asset-row__name {
+  flex: 0 0 7rem;
+  min-width: 0;
+}
+
+.asset-row__amount {
+  flex: 0 0 6rem;
+  min-width: 0;
+}
+
+.asset-row__rate {
+  flex: 0 0 3rem;
+  min-width: 0;
+}
+
+.asset-row .unit {
+  flex: 0 0 auto;
+}
+
+.asset-row__delete {
+  flex: 0 0 auto;
+  padding: 0 0.4rem;
+}
+
+.asset-row--header {
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
 .life-plan-simulator__tooltip {
   background: canvas;
   color: canvastext;

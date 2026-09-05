@@ -98,7 +98,20 @@ interface ChartPoint {
   incomeManYen: number;
   expenseManYen: number;
   annualBalanceManYen: number;
+  assetTotalManYen: number;
+  totalManYen: number;
 }
+
+interface AssetRecord {
+  id: string;
+  name: string;
+  amountManYen: NumberInput;
+  annualRatePercent: NumberInput;
+}
+
+const INITIAL_ASSET_RECORDS: AssetRecord[] = [
+  { id: "asset-1", name: "資産1", amountManYen: 1200, annualRatePercent: 0 },
+];
 
 function formatManYen(value: number): string {
   return `${Math.round(value).toLocaleString()}万円`;
@@ -148,7 +161,11 @@ function ChartTooltip({
         <span>{formatManYen(point.annualBalanceManYen)}</span>
       </p>
       <p className="life-plan-simulator__tooltip-row">
-        <span>累積貯蓄額</span>
+        <span>資産額</span>
+        <span>{formatManYen(point.assetTotalManYen)}</span>
+      </p>
+      <p className="life-plan-simulator__tooltip-row">
+        <span>貯金額</span>
         <span>{formatManYen(point.savingsManYen)}</span>
       </p>
     </div>
@@ -211,8 +228,9 @@ function MonthsField(props: UnitFieldProps) {
 
 function LifePlanSimulator() {
   const [currentAge, setCurrentAge] = useState<NumberInput>(40);
-  const [currentSavingsManYen, setCurrentSavingsManYen] =
-    useState<NumberInput>(1200);
+  const [assetRecords, setAssetRecords] = useState<AssetRecord[]>(
+    INITIAL_ASSET_RECORDS,
+  );
   const [decadeIncomes, setDecadeIncomes] = useState<DecadeIncome[]>(
     INITIAL_DECADE_INCOMES,
   );
@@ -252,11 +270,41 @@ function LifePlanSimulator() {
     );
   };
 
+  const addAssetRecord = () => {
+    setAssetRecords((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name: `資産${prev.length + 1}`,
+        amountManYen: 0,
+        annualRatePercent: 0,
+      },
+    ]);
+  };
+
+  const removeAssetRecord = (id: string) => {
+    setAssetRecords((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  const updateAssetRecord = (
+    id: string,
+    patch: Partial<Omit<AssetRecord, "id">>,
+  ) => {
+    setAssetRecords((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, ...patch } : a)),
+    );
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (
       currentAge === "" ||
-      currentSavingsManYen === "" ||
+      assetRecords.some(
+        (a) =>
+          a.name.trim() === "" ||
+          a.amountManYen === "" ||
+          a.annualRatePercent === "",
+      ) ||
       decadeIncomes.some((d) => d.incomeManYen === "") ||
       retirementAge === "" ||
       retirementBonusManYen === "" ||
@@ -335,8 +383,14 @@ function LifePlanSimulator() {
 
       const retirementBonusYen = retirementBonusManYen * YEN_PER_MAN_YEN;
 
+      // 各資産はそれぞれの年利で複利成長させ、毎年の収支は資産の運用とは別に
+      // 「現金バッファ」として利率なしで積み上げる(年利0%なら従来通りの単純合計と一致する)。
+      let assetBalancesYen = assetRecords.map(
+        (a) => (a.amountManYen as number) * YEN_PER_MAN_YEN,
+      );
+      let cashBufferYen = 0;
+
       const points: ChartPoint[] = [];
-      let savingsYen = currentSavingsManYen * YEN_PER_MAN_YEN;
       for (let age = currentAge; age <= SIMULATION_END_AGE; age++) {
         // 退職年齢までは年代別の年収、退職後は年金開始年齢に達するまで収入0円、
         // 年金開始年齢以降は年金額とする(退職と年金受給の重複は考慮しない)。
@@ -349,11 +403,26 @@ function LifePlanSimulator() {
               ? pensionAnnualAmountYen
               : 0) + (age === retirementAge ? retirementBonusYen : 0);
         if (age > currentAge) {
-          savingsYen += incomeYen - annualExpenseYen;
+          assetBalancesYen = assetBalancesYen.map(
+            (balance, i) =>
+              balance *
+              (1 + (assetRecords[i].annualRatePercent as number) / 100),
+          );
+          cashBufferYen += incomeYen - annualExpenseYen;
         }
+        // 貯金額(現金バッファ)には資産を含めない(資産は「資産額」として別枠で表示する)。
+        // グラフの縦軸は貯金額+資産額の合計を表示する。
+        const assetTotalYen = assetBalancesYen.reduce(
+          (sum, balance) => sum + balance,
+          0,
+        );
+        const savingsManYen = cashBufferYen / YEN_PER_MAN_YEN;
+        const assetTotalManYen = assetTotalYen / YEN_PER_MAN_YEN;
         points.push({
           age,
-          savingsManYen: savingsYen / YEN_PER_MAN_YEN,
+          savingsManYen,
+          assetTotalManYen,
+          totalManYen: savingsManYen + assetTotalManYen,
           incomeManYen: incomeYen / YEN_PER_MAN_YEN,
           expenseManYen: annualExpenseYen / YEN_PER_MAN_YEN,
           annualBalanceManYen: (incomeYen - annualExpenseYen) / YEN_PER_MAN_YEN,
@@ -492,13 +561,76 @@ function LifePlanSimulator() {
 
             <fieldset>
               <legend>資産</legend>
-              <ManYenField
-                id="currentSavingsManYen"
-                label="現在の貯蓄額"
-                min={0}
-                value={currentSavingsManYen}
-                onChange={setCurrentSavingsManYen}
-              />
+              <div className="asset-row asset-row--header">
+                <span className="asset-row__number"></span>
+                <span className="asset-row__name">名前</span>
+                <span className="asset-row__amount">金額</span>
+                <span className="unit" style={{ visibility: "hidden" }}>
+                  万円
+                </span>
+                <span className="asset-row__rate">年利</span>
+                <span className="unit" style={{ visibility: "hidden" }}>
+                  %
+                </span>
+                <span className="asset-row__delete"></span>
+              </div>
+              {assetRecords.map((asset, index) => (
+                <div className="asset-row" key={asset.id}>
+                  <span className="asset-row__number">{index + 1}</span>
+                  <input
+                    aria-label="資産名"
+                    type="text"
+                    className="asset-row__name"
+                    value={asset.name}
+                    onChange={(e) => {
+                      updateAssetRecord(asset.id, { name: e.target.value });
+                    }}
+                    required
+                  />
+                  <input
+                    aria-label="金額"
+                    type="number"
+                    className="asset-row__amount"
+                    min={0}
+                    value={asset.amountManYen}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      updateAssetRecord(asset.id, {
+                        amountManYen: value === "" ? "" : Number(value),
+                      });
+                    }}
+                    required
+                  />
+                  <span className="unit">万円</span>
+                  <input
+                    aria-label="年利"
+                    type="number"
+                    className="asset-row__rate"
+                    value={asset.annualRatePercent}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      updateAssetRecord(asset.id, {
+                        annualRatePercent: value === "" ? "" : Number(value),
+                      });
+                    }}
+                    required
+                  />
+                  <span className="unit">%</span>
+                  <button
+                    type="button"
+                    className="asset-row__delete"
+                    aria-label="この資産を削除"
+                    onClick={() => {
+                      removeAssetRecord(asset.id);
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              <button type="button" onClick={addAssetRecord}>
+                資産を追加
+              </button>
             </fieldset>
 
             <button type="submit" disabled={isLoading}>
@@ -556,7 +688,7 @@ function LifePlanSimulator() {
                 />
                 <Line
                   type="monotone"
-                  dataKey="savingsManYen"
+                  dataKey="totalManYen"
                   stroke="#3366cc"
                   dot={false}
                 />
