@@ -548,11 +548,26 @@ function LifePlanSimulator() {
 
             <fieldset>
               <legend>資産</legend>
-              {assetRecords.map((asset) => (
+              <div className="asset-row asset-row--header">
+                <span className="asset-row__number"></span>
+                <span className="asset-row__name">名前</span>
+                <span className="asset-row__amount">金額</span>
+                <span className="unit" style={{ visibility: "hidden" }}>
+                  万円
+                </span>
+                <span className="asset-row__rate">年利</span>
+                <span className="unit" style={{ visibility: "hidden" }}>
+                  %
+                </span>
+                <span className="asset-row__delete"></span>
+              </div>
+              {assetRecords.map((asset, index) => (
                 <div className="asset-row" key={asset.id}>
+                  <span className="asset-row__number">{index + 1}</span>
                   <input
                     aria-label="資産名"
                     type="text"
+                    className="asset-row__name"
                     value={asset.name}
                     onChange={(e) => {
                       updateAssetRecord(asset.id, { name: e.target.value });
@@ -562,6 +577,7 @@ function LifePlanSimulator() {
                   <input
                     aria-label="金額"
                     type="number"
+                    className="asset-row__amount"
                     min={0}
                     value={asset.amountManYen}
                     onChange={(e) => {
@@ -576,6 +592,7 @@ function LifePlanSimulator() {
                   <input
                     aria-label="年利"
                     type="number"
+                    className="asset-row__rate"
                     value={asset.annualRatePercent}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -588,12 +605,13 @@ function LifePlanSimulator() {
                   <span className="unit">%</span>
                   <button
                     type="button"
+                    className="asset-row__delete"
                     aria-label="この資産を削除"
                     onClick={() => {
                       removeAssetRecord(asset.id);
                     }}
                   >
-                    削除
+                    ×
                   </button>
                 </div>
               ))}

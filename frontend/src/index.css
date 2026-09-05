@@ -76,20 +76,45 @@ body {
   align-items: center;
   gap: 0.4rem;
   margin-bottom: 0.4rem;
+  min-height: 1.8rem;
 }
 
-.asset-row input[type="text"] {
-  flex: 1 1 auto;
-  min-width: 6rem;
+.asset-row input,
+.asset-row button {
+  box-sizing: border-box;
 }
 
-.asset-row input[type="number"] {
-  flex: 0 0 5rem;
+.asset-row__number {
+  flex: 0 0 1.2rem;
+}
+
+.asset-row__name {
+  flex: 0 0 7rem;
+  min-width: 0;
+}
+
+.asset-row__amount {
+  flex: 0 0 6rem;
+  min-width: 0;
+}
+
+.asset-row__rate {
+  flex: 0 0 3rem;
   min-width: 0;
 }
 
 .asset-row .unit {
   flex: 0 0 auto;
+}
+
+.asset-row__delete {
+  flex: 0 0 auto;
+  padding: 0 0.4rem;
+}
+
+.asset-row--header {
+  font-size: 0.85rem;
+  font-weight: bold;
 }
 
 .life-plan-simulator__tooltip {
