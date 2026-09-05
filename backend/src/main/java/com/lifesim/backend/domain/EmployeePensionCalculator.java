@@ -1,5 +1,6 @@
 package com.lifesim.backend.domain;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,9 @@ public class EmployeePensionCalculator {
   static final int MAXIMUM_RETIREMENT_AGE = 100;
 
   private static final int MONTHS_PER_YEAR = 12;
+
+  /** この計算が基づく制度(総報酬制、給付乗率5.481/1000)の施行日。 */
+  static final LocalDate EFFECTIVE_DATE = LocalDate.of(2003, 4, 1);
 
   /**
    * 年代別の年収・働き方、退職年齢、受給開始年齢から老齢厚生年金額を計算する。
@@ -82,7 +86,7 @@ public class EmployeePensionCalculator {
 
     if (enrolledMonths == 0) {
       return new EmployeePensionResult(
-          new EmployeePensionEligibility(0, 0), claimAge, new PensionAmount(0, 0));
+          new EmployeePensionEligibility(0, 0), claimAge, new PensionAmount(0, 0), EFFECTIVE_DATE);
     }
 
     long averageStandardRemunerationManYen =
@@ -107,6 +111,7 @@ public class EmployeePensionCalculator {
     return new EmployeePensionResult(
         new EmployeePensionEligibility((int) enrolledMonths, averageStandardRemunerationManYen),
         claimAge,
-        new PensionAmount(annualAmountYen, monthlyAmountYen));
+        new PensionAmount(annualAmountYen, monthlyAmountYen),
+        EFFECTIVE_DATE);
   }
 }

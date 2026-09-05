@@ -3,6 +3,7 @@ package com.lifesim.backend.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,7 @@ class EmployeePensionCalculatorTest {
     // 平均標準報酬額(月額) = 533.33 / 12 = 44万円(四捨五入)
     assertThat(result.eligibility().averageStandardRemunerationManYen()).isEqualTo(44);
     assertThat(result.pensionAmount().annualAmountYen()).isEqualTo(1_302_286);
+    assertThat(result.effectiveDate()).isEqualTo(LocalDate.of(2003, 4, 1));
   }
 
   @Test

@@ -53,7 +53,8 @@ Content-Type: application/json
 {
   "eligibility": { "enrolledMonths": 480, "averageStandardRemunerationManYen": 540 },
   "claimAge": { "years": 65 },
-  "pensionAmount": { "annualAmountYen": 33465288, "monthlyAmountYen": 2788774 }
+  "pensionAmount": { "annualAmountYen": 33465288, "monthlyAmountYen": 2788774 },
+  "effectiveDate": "2003-04-01"
 }
 ```
 
@@ -64,6 +65,7 @@ Content-Type: application/json
 | `claimAge.years` | integer | 計算に使用した受給開始年齢(歳) |
 | `pensionAmount.annualAmountYen` | integer | 年金額(年額、円) |
 | `pensionAmount.monthlyAmountYen` | integer | 年金額(月額、円) |
+| `effectiveDate` | string (ISO 8601 date) | この計算が基づく制度(総報酬制、給付乗率5.481/1000)の施行日 |
 
 ### エラーレスポンス(400 Bad Request)
 
