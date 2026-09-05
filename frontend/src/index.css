@@ -96,3 +96,8 @@ body {
 .life-plan-simulator__tooltip-row span:last-child {
   text-align: right;
 }
+
+.life-plan-simulator__pension-summary {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}

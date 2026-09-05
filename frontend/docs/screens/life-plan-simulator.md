@@ -56,7 +56,10 @@
 
 ## 計算方法
 
-1. `POST /api/pension/basic-pension` を1回呼び出し、`pensionAmount.annualAmountYen`(年金の年額、円)を取得する。
+1. `POST /api/pension/basic-pension`(老齢基礎年金)と`POST /api/pension/employee-pension`(老齢厚生年金)を`Promise.all`で並列に1回ずつ呼び出す。
+   - `basic-pension`: `eligibilityPeriod.paidMonths`・`claimAge.years`(既存通り)
+   - `employee-pension`: `decadeIncomes`(既存の年代別年収・働き方をそのまま渡す)・`retirementAge`・`claimAge.years`
+   - 年金の年額 = 両APIの`pensionAmount.annualAmountYen`の合計(円)
 2. 入力(万円)を円に変換する:
    - `currentSavingsYen = currentSavingsManYen × 10,000`
    - `annualExpenseYen = (livingExpenseManYenPerMonth + housingExpenseManYenPerMonth + insurancePremiumManYenPerMonth) × 12 × 10,000`
@@ -73,15 +76,20 @@
      - `retirementAge <= age かつ age < claimAgeYears`: `0`(退職済みだが年金受給前)
      - `age >= claimAgeYears`: 年金の年額(受給開始後)
    - `cumulative[age] = cumulative[age - 1] + 収入 - annualExpenseYen`
-   - `workStyle20s`〜`workStyle60s`は現時点の収支計算には使用しない(将来の老齢厚生年金計算のためのデータ収集)。
 5. 表示直前に万円へ変換(`÷ 10,000`)し、横軸=年齢、縦軸=累積貯蓄額(万円)の折れ線グラフとして表示する。グラフには0万円のラインを強調表示する(赤色の基準線)。
 6. グラフ上の各点をホバーした際のツールチップに、その年齢の「収入」「支出」「年間収支(収入−支出)」「累積貯蓄額」をあわせて表示する。
+7. グラフの上(ボタンとグラフの間)に、年金の内訳を1行のテキストで表示する:
+   ```
+   年金試算: 老齢基礎年金 84.7万円/年 + 老齢厚生年金 130.2万円/年 = 合計 215万円/年
+   (厚生年金加入月数: 540ヶ月、平均標準報酬額: 44万円/月)
+   ```
+   `employee-pension`のレスポンスの`eligibility.enrolledMonths`・`eligibility.averageStandardRemunerationManYen`をそのまま表示に使う。
 
 ## 前提・簡易化
 
 - シミュレーション終了年齢は100歳固定。
 - 年収は年代別(10年単位)で入力し、同一年代内は一定と仮定する(インフレ・支出変化は考慮しない)。支出は生涯一定と仮定する。
-- 老齢基礎年金以外の収入(厚生年金、貯蓄の運用益等)は考慮しない。「働き方」の入力は将来の老齢厚生年金計算に備えたデータ収集であり、現時点の収支計算には影響しない。
+- 老齢基礎年金・老齢厚生年金以外の収入(貯蓄の運用益等)は考慮しない。
 - 額面ベースの簡易計算(税・社会保険料控除は考慮しない)。
 
 ## 使用ライブラリ
