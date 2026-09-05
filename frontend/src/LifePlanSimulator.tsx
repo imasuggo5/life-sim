@@ -275,7 +275,7 @@ function LifePlanSimulator() {
       ...prev,
       {
         id: crypto.randomUUID(),
-        name: "",
+        name: `資産${prev.length + 1}`,
         amountManYen: 0,
         annualRatePercent: 0,
       },
